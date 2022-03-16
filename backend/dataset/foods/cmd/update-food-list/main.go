@@ -13,7 +13,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/ACMCSUFDEVPROJECTS/Food-Tinder/backend/dataset/foods"
+	"github.com/acmCSUFDev/Food-Tinder/backend/dataset/foods"
 )
 
 const src = "https://raw.githubusercontent.com/Open-Food/Open-Food-Standard/master/datasets/Food%20Types%207%20Feb%202012.csv"

@@ -3,7 +3,7 @@ package foodtinder
 import (
 	"time"
 
-	"github.com/ACMCSUFDEVPROJECTS/Food-Tinder/backend/dataset/foods"
+	"github.com/acmCSUFDev/Food-Tinder/backend/dataset/foods"
 	"github.com/bwmarrin/snowflake"
 	"golang.org/x/time/rate"
 )
@@ -19,11 +19,25 @@ func init() { snowflake.Epoch = SnowflakeEpoch }
 type AssetHash string
 
 // Date describes a Date with undefined time.
-type Date = time.Time
+type Date struct {
+	D uint8
+	M uint8
+	Y uint16
+}
 
-// ImageHash describes a string that is a hashed version of any image. The
-// string is hashed using the Blurhash algorithm.
-type ImageHash string
+// String formats Date in "02 January 2006" format.
+func (d Date) String() string {
+	return d.Time().Format("02 January 2006")
+}
+
+// Time returns the date in local time.
+func (d Date) Time() time.Time {
+	return time.Date(int(d.Y), time.Month(d.M), int(d.D), 0, 0, 0, 0, time.Local)
+}
+
+// BlurHash describes a string that is a hashed version of any image. The string
+// is hashed using the Blurhash algorithm.
+type BlurHash string
 
 // ID is the Snowflake ID type for an entity. An inherent property of Snowflake
 // IDs is that creation time is embedded inside the ID itself. Thus, all IDs,
@@ -52,6 +66,32 @@ var (
 	}
 )
 
+// LoginMetadata is the metadata of each login or register operation. As with
+// all metadata, everything in this structure is optional.
+type LoginMetadata struct {
+	// UserAgent is the user-agent that the user was on when they logged in.
+	UserAgent string
+}
+
+// Self extends User to contain personal-sensitive information.
+type Session struct {
+	// UserID is the ID of the user that the session identifies.
+	UserID ID
+	// Token is the token of the session.
+	Token string
+	// Expiry is the time that the session token expires.
+	Expiry time.Time
+	// Metadata is the metadata that was created when the user first logged in.
+	Metadata LoginMetadata
+}
+
+// Self extends User and contains private information about that user.
+type Self struct {
+	User
+	// Birthday is the user's birthday.
+	Birthday Date
+}
+
 // User describes a user.
 type User struct {
 	ID ID
@@ -59,8 +99,8 @@ type User struct {
 	Name string
 	// Avatar is the asset hash string that can be used to create a URL.
 	Avatar AssetHash
-	// Birthday is the user's birthday.
-	Birthday Date
+	// Bio is the user biography (or description).
+	Bio string
 }
 
 // FoodPreferences describes a user's food preferences.
@@ -89,11 +129,22 @@ type Post struct {
 	ID ID
 	// UserID is the ID of the user who posted the food item.
 	UserID ID
-	// CoverHash is the hash of the cover image.
-	CoverHash ImageHash
+	// CoverHash is the blur hash of the cover image.
+	CoverHash BlurHash
 	// Images is the list of image asset hashes for this food item. The first
 	// image should be used as the cover.
 	Images []AssetHash
 	// Description contains the description of the food item.
 	Description string
+	// Tags is a list of food names that this post is relevant to. It can be
+	// used for the recommendation algorithm.
+	Tags []foods.Name
+}
+
+// UserPostPreferences extends Post to add information specific to a single
+// user.
+type UserPostPreferences struct {
+	Post
+	// LikedAt is not nil if the user has liked the post before.
+	LikedAt *time.Time
 }
