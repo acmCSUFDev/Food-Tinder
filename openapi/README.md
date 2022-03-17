@@ -25,11 +25,11 @@
 
 ```json
 {
-  "user_id": "string",
-  "token": "string",
+  "user_id": "953809515621527562",
+  "token": "WlvPXdNuyfttl8eSV67hkbsX51wLURzT",
   "expiry": "2019-08-24T14:15:22Z",
   "metadata": {
-    "user_agent": "string"
+    "user_agent": "curl/7.64.1"
   }
 }
 ```
@@ -64,11 +64,11 @@ This operation does not require authentication
 
 ```json
 {
-  "user_id": "string",
-  "token": "string",
+  "user_id": "953809515621527562",
+  "token": "WlvPXdNuyfttl8eSV67hkbsX51wLURzT",
   "expiry": "2019-08-24T14:15:22Z",
   "metadata": {
-    "user_agent": "string"
+    "user_agent": "curl/7.64.1"
   }
 }
 ```
@@ -123,10 +123,10 @@ This operation does not require authentication
 
 ```json
 {
-  "id": "string",
-  "name": "string",
-  "avatar": "string",
-  "bio": "string"
+  "id": "953809515621527562",
+  "name": "food-tinder-user",
+  "avatar": "ypeBEsobvcr6wjGzmiPcTaeG7_gUfE5yuYB3ha_uSLs=",
+  "bio": "Hello, world."
 }
 ```
 
@@ -150,9 +150,7 @@ This operation does not require authentication
 <a id="tocserror"></a>
 
 ```json
-{
-  "message": "string"
-}
+"server blew up"
 
 ```
 
@@ -172,7 +170,7 @@ Error object returned on any error
 <a id="tocsid"></a>
 
 ```json
-"string"
+"953809515621527562"
 
 ```
 
@@ -193,7 +191,7 @@ Snowflake ID
 
 ```json
 {
-  "user_agent": "string"
+  "user_agent": "curl/7.64.1"
 }
 
 ```
@@ -215,11 +213,11 @@ Optional metadata included on login
 
 ```json
 {
-  "user_id": "string",
-  "token": "string",
+  "user_id": "953809515621527562",
+  "token": "WlvPXdNuyfttl8eSV67hkbsX51wLURzT",
   "expiry": "2019-08-24T14:15:22Z",
   "metadata": {
-    "user_agent": "string"
+    "user_agent": "curl/7.64.1"
   }
 }
 
@@ -270,10 +268,10 @@ and
 
 ```json
 {
-  "id": "string",
-  "name": "string",
-  "avatar": "string",
-  "bio": "string"
+  "id": "953809515621527562",
+  "name": "food-tinder-user",
+  "avatar": "ypeBEsobvcr6wjGzmiPcTaeG7_gUfE5yuYB3ha_uSLs=",
+  "bio": "Hello, world."
 }
 
 ```
@@ -297,11 +295,28 @@ and
 ```json
 {
   "likes": [
-    "string"
+    "Rice",
+    "Fish"
   ],
   "prefers": {
-    "property1": "string",
-    "property2": "string"
+    "property1": {
+      "Rice": [
+        "Sushi Rice"
+      ],
+      "Fish": [
+        "Ahi Tuna",
+        "Salmon"
+      ]
+    },
+    "property2": {
+      "Rice": [
+        "Sushi Rice"
+      ],
+      "Fish": [
+        "Ahi Tuna",
+        "Salmon"
+      ]
+    }
   }
 }
 
@@ -313,7 +328,7 @@ and
 |---|---|---|---|---|
 |likes|[string]|true|none|none|
 |prefers|object|true|none|none|
-|» **additionalProperties**|string|false|none|none|
+|» **additionalProperties**|[string]|false|none|none|
 
 <h2 id="tocS_UserLikedPosts">UserLikedPosts</h2>
 <!-- backwards compatibility -->
@@ -325,10 +340,10 @@ and
 ```json
 {
   "posts": {
-    "property1": "2019-08-24T14:15:22Z",
-    "property2": "2019-08-24T14:15:22Z"
+    "953809515621527562": "2018-08-24T14:15:22Z",
+    "953809438236627014": "2018-08-24T14:15:48Z"
   },
-  "remaining": 0,
+  "remaining": 3,
   "expires": "2019-08-24T14:15:22Z"
 }
 
@@ -338,10 +353,10 @@ and
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|posts|object|true|none|none|
+|posts|object|true|none|Posts maps post IDs to the time that the user liked.|
 |» **additionalProperties**|string(date-time)|false|none|none|
-|remaining|number|true|none|none|
-|expires|string(date-time)|true|none|none|
+|remaining|number|true|none|Remaining is the number of likes allowed by the user until the Expires timestamp.|
+|expires|string(date-time)|true|none|Expires is the time that the rate limiter (the Remaining field) replenishes.|
 
 <h2 id="tocS_Post">Post</h2>
 <!-- backwards compatibility -->
@@ -352,16 +367,18 @@ and
 
 ```json
 {
-  "id": "string",
-  "user_id": "string",
-  "cover_hash": "string",
+  "id": "953809515621527562",
+  "user_id": "953809515621527562",
+  "cover_hash": "LEHV6nWB2yk8pyoJadR*.7kCMdnj",
   "images": [
-    "string"
+    "ypeBEsobvcr6wjGzmiPcTaeG7_gUfE5yuYB3ha_uSLs="
   ],
-  "description": "string",
+  "description": "Salmon roll for $8.\n\nPretty cheap for me.",
   "tags": [
-    "string"
-  ]
+    "Salmon",
+    "Sushi Rice"
+  ],
+  "location": "string"
 }
 
 ```
@@ -376,4 +393,5 @@ and
 |images|[string]|true|none|none|
 |description|string|true|none|none|
 |tags|[string]|true|none|none|
+|location|string|false|none|Location is the location where the post was made.|
 

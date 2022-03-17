@@ -173,6 +173,7 @@
     "schemas": {
       "Error": {
         "description": "Error object returned on any error",
+        "example": "server blew up",
         "required": [
           "message"
         ],
@@ -184,6 +185,7 @@
       },
       "ID": {
         "description": "Snowflake ID",
+        "example": "953809515621527562",
         "type": "string",
         "x-go-type": "int64"
       },
@@ -192,6 +194,7 @@
         "properties": {
           "user_agent": {
             "description": "The User-Agent used for logging in",
+            "example": "curl/7.64.1",
             "type": "string"
           }
         }
@@ -207,7 +210,8 @@
             "$ref": "#/components/schemas/ID"
           },
           "token": {
-            "type": "string"
+            "type": "string",
+            "example": "WlvPXdNuyfttl8eSV67hkbsX51wLURzT"
           },
           "expiry": {
             "type": "string",
@@ -247,13 +251,16 @@
             "$ref": "#/components/schemas/ID"
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "example": "food-tinder-user"
           },
           "avatar": {
-            "type": "string"
+            "type": "string",
+            "example": "ypeBEsobvcr6wjGzmiPcTaeG7_gUfE5yuYB3ha_uSLs="
           },
           "bio": {
-            "type": "string"
+            "type": "string",
+            "example": "Hello, world."
           }
         }
       },
@@ -267,12 +274,28 @@
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "example": [
+              "Rice",
+              "Fish"
+            ]
           },
           "prefers": {
             "type": "object",
             "additionalProperties": {
-              "type": "string"
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "example": {
+                "Rice": [
+                  "Sushi Rice"
+                ],
+                "Fish": [
+                  "Ahi Tuna",
+                  "Salmon"
+                ]
+              }
             }
           }
         }
@@ -289,14 +312,22 @@
             "additionalProperties": {
               "type": "string",
               "format": "date-time"
+            },
+            "description": "Posts maps post IDs to the time that the user liked.",
+            "example": {
+              "953809515621527562": "2018-08-24T14:15:22Z",
+              "953809438236627014": "2018-08-24T14:15:48Z"
             }
           },
           "remaining": {
-            "type": "number"
+            "type": "number",
+            "description": "Remaining is the number of likes allowed by the user until the Expires timestamp.",
+            "example": 3
           },
           "expires": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "Expires is the time that the rate limiter (the Remaining field) replenishes."
           }
         }
       },
@@ -316,22 +347,35 @@
             "$ref": "#/components/schemas/ID"
           },
           "cover_hash": {
-            "type": "string"
+            "type": "string",
+            "example": "LEHV6nWB2yk8pyoJadR*.7kCMdnj"
           },
           "images": {
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "example": [
+              "ypeBEsobvcr6wjGzmiPcTaeG7_gUfE5yuYB3ha_uSLs="
+            ]
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "example": "Salmon roll for $8.\n\nPretty cheap for me."
           },
           "tags": {
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "example": [
+              "Salmon",
+              "Sushi Rice"
+            ]
+          },
+          "location": {
+            "type": "string",
+            "description": "Location is the location where the post was made."
           }
         }
       }

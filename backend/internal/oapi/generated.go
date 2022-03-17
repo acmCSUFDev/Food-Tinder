@@ -34,7 +34,7 @@ type FoodPreferences struct {
 
 // FoodPreferences_Prefers defines model for FoodPreferences.Prefers.
 type FoodPreferences_Prefers struct {
-	AdditionalProperties map[string]string `json:"-"`
+	AdditionalProperties map[string][]string `json:"-"`
 }
 
 // Snowflake ID
@@ -54,7 +54,10 @@ type Post struct {
 	// Snowflake ID
 	ID     ID       `json:"id"`
 	Images []string `json:"images"`
-	Tags   []string `json:"tags"`
+
+	// Location is the location where the post was made.
+	Location *string  `json:"location,omitempty"`
+	Tags     []string `json:"tags"`
 
 	// Snowflake ID
 	UserID ID `json:"user_id"`
@@ -92,12 +95,17 @@ type User struct {
 
 // UserLikedPosts defines model for UserLikedPosts.
 type UserLikedPosts struct {
-	Expires   time.Time            `json:"expires"`
-	Posts     UserLikedPosts_Posts `json:"posts"`
-	Remaining float32              `json:"remaining"`
+	// Expires is the time that the rate limiter (the Remaining field) replenishes.
+	Expires time.Time `json:"expires"`
+
+	// Posts maps post IDs to the time that the user liked.
+	Posts UserLikedPosts_Posts `json:"posts"`
+
+	// Remaining is the number of likes allowed by the user until the Expires timestamp.
+	Remaining float32 `json:"remaining"`
 }
 
-// UserLikedPosts_Posts defines model for UserLikedPosts.Posts.
+// Posts maps post IDs to the time that the user liked.
 type UserLikedPosts_Posts struct {
 	AdditionalProperties map[string]time.Time `json:"-"`
 }
@@ -224,7 +232,7 @@ func GetUsersIDJSON200Response(body User) *Response {
 
 // Getter for additional properties for FoodPreferences_Prefers. Returns the specified
 // element and whether it was found
-func (a FoodPreferences_Prefers) Get(fieldName string) (value string, found bool) {
+func (a FoodPreferences_Prefers) Get(fieldName string) (value []string, found bool) {
 	if a.AdditionalProperties != nil {
 		value, found = a.AdditionalProperties[fieldName]
 	}
@@ -232,9 +240,9 @@ func (a FoodPreferences_Prefers) Get(fieldName string) (value string, found bool
 }
 
 // Setter for additional properties for FoodPreferences_Prefers
-func (a *FoodPreferences_Prefers) Set(fieldName string, value string) {
+func (a *FoodPreferences_Prefers) Set(fieldName string, value []string) {
 	if a.AdditionalProperties == nil {
-		a.AdditionalProperties = make(map[string]string)
+		a.AdditionalProperties = make(map[string][]string)
 	}
 	a.AdditionalProperties[fieldName] = value
 }
@@ -248,9 +256,9 @@ func (a *FoodPreferences_Prefers) UnmarshalJSON(b []byte) error {
 	}
 
 	if len(object) != 0 {
-		a.AdditionalProperties = make(map[string]string)
+		a.AdditionalProperties = make(map[string][]string)
 		for fieldName, fieldBuf := range object {
-			var fieldVal string
+			var fieldVal []string
 			err := json.Unmarshal(fieldBuf, &fieldVal)
 			if err != nil {
 				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
@@ -331,22 +339,30 @@ func (a UserLikedPosts_Posts) MarshalJSON() ([]byte, error) {
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/+xXUW/jNgz+K4K2R6XJtmIPfivQ7RCgwxW7G3BAURwUi3Z0tSQfJbeXBf7vAyU7qWOn",
-	"Tbdg2MOeqljiJ/L7KJLd8tyZ2lmwwfNsyxF87ayH+OPy0yf6kzsbwAZayrqudC6Ddnb+xTtL33y+BiNp",
-	"9T1CwTP+3XyPOU+7fv4LokPetq3gCnyOuiYQnvE/PCCDbld0aPH6ZJJtDwziZ+ZWXyAPDCE0aEExZ5m0",
-	"mw5I8BpdDRh0CsSA97IEWoZNDTzjPqC2ZbwR4WujERTP7nYH71vBf3VO3SIUgGDzhDNErfRDWugAxk+A",
-	"i/6DRJQb+l1HvHhWKqUpIlndDlCPYaSARx4nJ/bI5PnyeszaB+ueiko+AFtec3Fwi+DfZqWbdR+1DT9f",
-	"0s03rtT2NwhSySDHkO/r5D8z3RGmbV41KqlRkfFIicYDfpZll05DvI9rYJQNsyvaZ40HxQqHhFRqW7II",
-	"d6hfK/it82GsTu4eAT+vpV9Psjq4emJfq9cyenkdzxlZvjULgizfaBFpO82lg/zQiu/Nd+4O4+88otT5",
-	"AFURs7Oq3hc8u3v5PlKLt+KQ+pXGsFZyQ+vCoZGBZ1zJABP6Db3dWd63yRvvO4GGN8C3WuMYfxa0mbhE",
-	"cPMsiV8KaJjxJIR7gOkE+fuS7NVI6KIPh0KOlI7ilY8ySJz0Y6XdP0pgK80JhTG6G4+K3pne2xv9AIre",
-	"oD+iU1qeJlTd4xwrj6fBHNRMisVIbWl3H6ptzApwFGpy4bmJ2MVxHwuOtkXiXIcKYiEEe3W7ZInYWLOo",
-	"ecw+aquAutEjYMpjvrhYXPxADrkarKw1z/hPF4uLBRVKGdYxxHkqnURmV9mIgNh0l4pnqSxHA5QGQuwn",
-	"d1tOJvxrA7jppcpiqnWq7UMM2IB41rZH7PmwiXER1/F5T0HX0vsnh+pF6J1az06/ct29GA4hPy4WZxtC",
-	"+noyMYbcuLIExbRlvslz8L5oqirW3svkwBTuztE5jUpxfGmMkVSZCJDQGk+tq9eBSavYjgsymCOU2ofu",
-	"0U/q/Xt/4n/Jzyp5zyuoc2neI76uOm35ue+6bQlD2XlGn2IvFgfJ8A4CFV3fbU7xdrrz4lwcVwURPCTj",
-	"HQQW1sDyBrGb52hYSKOm0UpV8CRjc7jjpvHhqglrh/rPNH13DG21ao8zFJvlMYbinHvwYMYD5/KauSL6",
-	"2SSwmPhUi/d5r1/O+Nfb/3/iOXX/zf17aZGmw6m0kJFsttoQ8RpZmkROSYy2/SsAAP//AlYMAbIOAAA=",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

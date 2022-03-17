@@ -139,6 +139,8 @@ type Post struct {
 	// Tags is a list of food names that this post is relevant to. It can be
 	// used for the recommendation algorithm.
 	Tags []foods.Name
+	// Location is the location where the post was made.
+	Location string
 }
 
 // UserPostPreferences extends Post to add information specific to a single
