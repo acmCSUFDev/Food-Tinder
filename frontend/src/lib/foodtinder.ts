@@ -23,10 +23,13 @@ export type Session = {
     user_id: Id;
     token: string;
     expiry: string;
-    metadata?: LoginMetadata;
+    metadata: LoginMetadata;
 };
 export type Error = {
     message: string;
+};
+export type FormError = Error & {
+    form_id?: string;
 };
 export type User = {
     id: Id;
@@ -34,8 +37,23 @@ export type User = {
     avatar: string;
     bio?: string;
 };
-export type Self = User & {
+export type FoodPreferences = {
+    likes: string[];
+    prefers: {
+        [key: string]: string[];
+    };
+};
+export type Self = User & FoodPreferences & {
     birthday: string;
+};
+export type Post = {
+    id: Id;
+    user_id: Id;
+    cover_hash?: string;
+    images: string[];
+    description: string;
+    tags: string[];
+    location?: string;
 };
 /**
  * Log in using username and password
@@ -46,6 +64,9 @@ export function login(username: string, password: string, opts?: Oazapfts.Reques
         data: Session;
     } | {
         status: 400;
+        data: FormError;
+    } | {
+        status: 500;
         data: Error;
     }>(`/login${QS.query(QS.form({
         username,
@@ -58,15 +79,19 @@ export function login(username: string, password: string, opts?: Oazapfts.Reques
 /**
  * Register using username and password
  */
-export function register(username: string, opts?: Oazapfts.RequestOpts) {
+export function register(username: string, password: string, opts?: Oazapfts.RequestOpts) {
     return oazapfts.ok(oazapfts.fetchJson<{
         status: 200;
         data: Session;
     } | {
         status: 400;
+        data: FormError;
+    } | {
+        status: 500;
         data: Error;
     }>(`/register${QS.query(QS.form({
-        username
+        username,
+        password
     }))}`, {
         ...opts,
         method: "POST"
@@ -75,7 +100,7 @@ export function register(username: string, opts?: Oazapfts.RequestOpts) {
 /**
  * Get the current user
  */
-export function getUsersSelf(opts?: Oazapfts.RequestOpts) {
+export function getSelf(opts?: Oazapfts.RequestOpts) {
     return oazapfts.ok(oazapfts.fetchJson<{
         status: 200;
         data: Self;
@@ -86,13 +111,56 @@ export function getUsersSelf(opts?: Oazapfts.RequestOpts) {
 /**
  * Get a user by their ID
  */
-export function getUsersById(id: Id, password: string, opts?: Oazapfts.RequestOpts) {
+export function getUser(id: Id, password: string, opts?: Oazapfts.RequestOpts) {
     return oazapfts.ok(oazapfts.fetchJson<{
         status: 200;
         data: User;
     }>(`/users/${id}${QS.query(QS.form({
         password
     }))}`, {
+        ...opts
+    }));
+}
+/**
+ * Get the next batch of posts
+ */
+export function nextPosts({ prevId }: {
+    prevId?: Id;
+} = {}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.ok(oazapfts.fetchJson<{
+        status: 200;
+        data: User[];
+    }>(`/posts${QS.query(QS.form({
+        prev_id: prevId
+    }))}`, {
+        ...opts
+    }));
+}
+/**
+ * Delete the current user's posts by ID. A 401 is returned if the user tries to delete someone else's post.
+ */
+export function deletePosts(id: Id, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.ok(oazapfts.fetchJson<{
+        status: 200;
+    } | {
+        status: 401;
+        data: Error;
+    } | {
+        status: 500;
+        data: Error;
+    }>(`/posts/${id}`, {
+        ...opts,
+        method: "DELETE"
+    }));
+}
+/**
+ * Get the list of posts liked by the user
+ */
+export function getLikedPosts(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.ok(oazapfts.fetchJson<{
+        status: 200;
+        data: Post[];
+    }>("/posts/liked", {
         ...opts
     }));
 }

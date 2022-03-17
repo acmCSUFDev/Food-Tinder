@@ -6,6 +6,7 @@ import "context"
 type Server interface {
 	LoginServer() LoginServer
 	AuthorizerServer() AuthorizerServer
+	AuthorizedServer(s *Session) AuthorizedServer
 }
 
 // LoginServer describes a service serving Sessions.
@@ -21,7 +22,7 @@ type LoginServer interface {
 type AuthorizerServer interface {
 	// Authorize authorizes the user using the given session token. The session
 	// is returned if the token points to a valid user.
-	Authorize(ctx context.Context, token string) (AuthorizedServer, error)
+	Authorize(ctx context.Context, token string) (*Session, error)
 }
 
 // AuthorizedServer describes a service for a specific user session.
@@ -42,10 +43,11 @@ type PostServer interface {
 	// NextPosts returns the list of posts that the user will see next
 	// starting from the given previous ID. If the ID is 0, then the top is
 	// assumed.
-	NextPosts(ctx context.Context, previousID ID, limit int) ([]Post, error)
+	NextPosts(ctx context.Context, previousID ID) ([]Post, error)
+	LikedPosts(ctx context.Context) ([]Post, error)
 	// DeletePosts deletes the given posts. Only the posts that belong to the
 	// current user can be deleted.
-	DeletePosts(ctx context.Context, ids ...ID) error
+	DeletePost(ctx context.Context, id ID) error
 }
 
 // UserServer describes a service serving Users.
@@ -55,6 +57,4 @@ type UserServer interface {
 	// FoodPreferences fetches the food preferences of the user with the given
 	// ID.
 	FoodPreferences(ctx context.Context) (*FoodPreferences, error)
-	// FoodBacklog gets the backlog of food items that the user has liked.
-	FoodBacklog(ctx context.Context)
 }

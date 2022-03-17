@@ -4,11 +4,16 @@ let goapi-gen = pkgs.buildGoModule {
 		name = "goapi-gen";
 		version = "081d60b";
 
-		src = pkgs.fetchFromGitHub {
-			owner  = "discord-gophers";
-			repo   = "goapi-gen";
-			rev    = "081d60b";
-			sha256 = "0gsy02gxqm9f2lbr8jzlvbhksqg0v5xi288462c3a3j8aics5nm2";
+		# src = pkgs.fetchFromGitHub {
+		# 	owner  = "discord-gophers";
+		# 	repo   = "goapi-gen";
+		# 	rev    = "081d60b";
+		# 	sha256 = "0gsy02gxqm9f2lbr8jzlvbhksqg0v5xi288462c3a3j8aics5nm2";
+		# };
+		src = pkgs.fetchgit {
+			url    = "https://git.sr.ht/~diamondburned/goapi-gen";
+			rev    = "be79ddfa8242af14b70feceff87e52ab3c3bcc81";
+			sha256 = "0kcr1rfgdhlsgbjdw23v1zx13w2gcd2zvmgfamwgk9z1p6if4y4c";
 		};
 
 		vendorSha256 = "1aq24cx5qirgzjcahzqjkzc50687xj2vqz623f56q5j5m2x8cj73";

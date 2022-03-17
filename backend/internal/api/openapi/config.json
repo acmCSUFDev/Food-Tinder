@@ -1,0 +1,4 @@
+{
+  "output": "generated.go",
+  "package": "openapi"
+}

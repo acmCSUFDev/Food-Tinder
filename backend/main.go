@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/acmCSUFDev/Food-Tinder/backend/internal/api"
 	"github.com/diamondburned/listener"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -31,6 +32,7 @@ func main() {
 	r.Use(middleware.Timeout(15 * time.Second))
 
 	r.Get("/", hello)
+	r.Mount("/api/v0", api.Handler(nil))
 
 	// SIGINT handler in a cancellable context.
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)

@@ -1,9 +1,0 @@
-{
-  "output": "generated.go",
-  "package": "oapi",
-  "generate": [
-    "types",
-    "skip-prune",
-    "spec"
-  ]
-}

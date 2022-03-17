@@ -8,6 +8,7 @@ require (
 	github.com/discord-gophers/goapi-gen v0.1.1
 	github.com/getkin/kin-openapi v0.92.0
 	github.com/go-chi/chi v1.5.4
+	github.com/go-chi/chi/v5 v5.0.4
 	github.com/go-chi/render v1.0.1
 	github.com/joho/godotenv v1.4.0
 	golang.org/x/time v0.0.0-20220224211638-0e9765cccd65
