@@ -41,14 +41,116 @@
               }
             }
           },
-          "401": {
-            "description": "Invalid username/password",
+          "400": {
+            "$ref": "#/components/responses/4XX"
+          }
+        }
+      }
+    },
+    "/register": {
+      "post": {
+        "summary": "Register using username and password",
+        "operationId": "register",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "query",
+            "required": true,
+            "style": "form",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "password",
+            "in": "query",
+            "required": true,
+            "style": "form",
+            "schema": {
+              "type": "string",
+              "format": "password"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Registered successfully",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "$ref": "#/components/schemas/Session"
                 }
               }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/4XX"
+          }
+        }
+      }
+    },
+    "/users/self": {
+      "x-go-middlewares": [
+        "mustAuthorize"
+      ],
+      "get": {
+        "summary": "Get the current user",
+        "operation": "getSelf",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Self"
+                }
+              }
+            },
+            "400": {
+              "$ref": "#/components/responses/4XX"
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "x-go-middlewares": [
+        "mustAuthorize"
+      ],
+      "get": {
+        "summary": "Get a user by their ID",
+        "operation": "getUser",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The ID of the user",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ID"
+            }
+          },
+          {
+            "name": "password",
+            "in": "query",
+            "required": true,
+            "style": "form",
+            "schema": {
+              "type": "string",
+              "format": "password"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "4XX": {
+              "$ref": "#/components/responses/4XX"
             }
           }
         }
@@ -56,6 +158,18 @@
     }
   },
   "components": {
+    "responses": {
+      "4XX": {
+        "description": "User error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
     "schemas": {
       "Error": {
         "description": "Error object returned on any error",
@@ -101,6 +215,123 @@
           },
           "metadata": {
             "$ref": "#/components/schemas/LoginMetadata"
+          }
+        }
+      },
+      "Self": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/User"
+          },
+          {
+            "required": [
+              "birthday"
+            ],
+            "properties": {
+              "birthday": {
+                "type": "string",
+                "format": "date"
+              }
+            }
+          }
+        ]
+      },
+      "User": {
+        "required": [
+          "id",
+          "name",
+          "avatar"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "name": {
+            "type": "string"
+          },
+          "avatar": {
+            "type": "string"
+          },
+          "bio": {
+            "type": "string"
+          }
+        }
+      },
+      "FoodPreferences": {
+        "required": [
+          "likes",
+          "prefers"
+        ],
+        "properties": {
+          "likes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "prefers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "UserLikedPosts": {
+        "required": [
+          "posts",
+          "remaining",
+          "expires"
+        ],
+        "properties": {
+          "posts": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "remaining": {
+            "type": "number"
+          },
+          "expires": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Post": {
+        "required": [
+          "id",
+          "user_id",
+          "images",
+          "description",
+          "tags"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "user_id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "cover_hash": {
+            "type": "string"
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       }

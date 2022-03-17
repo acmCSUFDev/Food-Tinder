@@ -24,15 +24,24 @@ export type Session = {
 export type Error = {
     message: string;
 };
+export type User = {
+    id: Id;
+    name: string;
+    avatar: string;
+    bio?: string;
+};
+export type Self = User & {
+    birthday: string;
+};
 /**
  * Log in using username and password
  */
 export function login(username: string, password: string, opts?: Oazapfts.RequestOpts) {
-    return oazapfts.fetchJson<{
+    return oazapfts.ok(oazapfts.fetchJson<{
         status: 200;
         data: Session;
     } | {
-        status: 401;
+        status: 400;
         data: Error;
     }>(`/login${QS.query(QS.form({
         username,
@@ -40,5 +49,47 @@ export function login(username: string, password: string, opts?: Oazapfts.Reques
     }))}`, {
         ...opts,
         method: "POST"
-    });
+    }));
+}
+/**
+ * Register using username and password
+ */
+export function register(username: string, password: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.ok(oazapfts.fetchJson<{
+        status: 200;
+        data: Session;
+    } | {
+        status: 400;
+        data: Error;
+    }>(`/register${QS.query(QS.form({
+        username,
+        password
+    }))}`, {
+        ...opts,
+        method: "POST"
+    }));
+}
+/**
+ * Get the current user
+ */
+export function getUsersSelf(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.ok(oazapfts.fetchJson<{
+        status: 200;
+        data: Self;
+    }>("/users/self", {
+        ...opts
+    }));
+}
+/**
+ * Get a user by their ID
+ */
+export function getUsersById(id: Id, password: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.ok(oazapfts.fetchJson<{
+        status: 200;
+        data: User;
+    }>(`/users/${id}${QS.query(QS.form({
+        password
+    }))}`, {
+        ...opts
+    }));
 }

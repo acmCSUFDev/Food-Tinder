@@ -16,6 +16,7 @@ import (
 	"strings"
 	"time"
 
+	openapi_types "github.com/discord-gophers/goapi-gen/pkg/types"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/go-chi/render"
 )
@@ -25,6 +26,17 @@ type Error struct {
 	Message string `json:"message"`
 }
 
+// FoodPreferences defines model for FoodPreferences.
+type FoodPreferences struct {
+	Likes   []string                `json:"likes"`
+	Prefers FoodPreferences_Prefers `json:"prefers"`
+}
+
+// FoodPreferences_Prefers defines model for FoodPreferences.Prefers.
+type FoodPreferences_Prefers struct {
+	AdditionalProperties map[string]string `json:"-"`
+}
+
 // Snowflake ID
 type ID int64
 
@@ -32,6 +44,28 @@ type ID int64
 type LoginMetadata struct {
 	// The User-Agent used for logging in
 	UserAgent *string `json:"user_agent,omitempty"`
+}
+
+// Post defines model for Post.
+type Post struct {
+	CoverHash   *string `json:"cover_hash,omitempty"`
+	Description string  `json:"description"`
+
+	// Snowflake ID
+	ID     ID       `json:"id"`
+	Images []string `json:"images"`
+	Tags   []string `json:"tags"`
+
+	// Snowflake ID
+	UserID ID `json:"user_id"`
+}
+
+// Self defines model for Self.
+type Self struct {
+	// Embedded struct due to allOf(#/components/schemas/User)
+	User `yaml:",inline"`
+	// Embedded fields due to inline allOf schema
+	Birthday openapi_types.Date `json:"birthday"`
 }
 
 // Session defines model for Session.
@@ -46,9 +80,45 @@ type Session struct {
 	UserID ID `json:"user_id"`
 }
 
+// User defines model for User.
+type User struct {
+	Avatar string  `json:"avatar"`
+	Bio    *string `json:"bio,omitempty"`
+
+	// Snowflake ID
+	ID   ID     `json:"id"`
+	Name string `json:"name"`
+}
+
+// UserLikedPosts defines model for UserLikedPosts.
+type UserLikedPosts struct {
+	Expires   time.Time            `json:"expires"`
+	Posts     UserLikedPosts_Posts `json:"posts"`
+	Remaining float32              `json:"remaining"`
+}
+
+// UserLikedPosts_Posts defines model for UserLikedPosts.Posts.
+type UserLikedPosts_Posts struct {
+	AdditionalProperties map[string]time.Time `json:"-"`
+}
+
+// Error object returned on any error
+type N4xX Error
+
 // LoginParams defines parameters for Login.
 type LoginParams struct {
 	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+// RegisterParams defines parameters for Register.
+type RegisterParams struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+// GetUsersIDParams defines parameters for GetUsersID.
+type GetUsersIDParams struct {
 	Password string `json:"password"`
 }
 
@@ -102,29 +172,181 @@ func LoginJSON200Response(body Session) *Response {
 	}
 }
 
-// LoginJSON401Response is a constructor method for a Login response.
+// LoginJSON400Response is a constructor method for a Login response.
 // A *Response is returned with the configured status code and content type from the spec.
-func LoginJSON401Response(body Error) *Response {
+func LoginJSON400Response(body Error) *Response {
 	return &Response{
 		body:        body,
-		statusCode:  401,
+		statusCode:  400,
 		contentType: "application/json",
 	}
+}
+
+// RegisterJSON200Response is a constructor method for a Register response.
+// A *Response is returned with the configured status code and content type from the spec.
+func RegisterJSON200Response(body Session) *Response {
+	return &Response{
+		body:        body,
+		statusCode:  200,
+		contentType: "application/json",
+	}
+}
+
+// RegisterJSON400Response is a constructor method for a Register response.
+// A *Response is returned with the configured status code and content type from the spec.
+func RegisterJSON400Response(body Error) *Response {
+	return &Response{
+		body:        body,
+		statusCode:  400,
+		contentType: "application/json",
+	}
+}
+
+// GetUsersSelfJSON200Response is a constructor method for a GetUsersSelf response.
+// A *Response is returned with the configured status code and content type from the spec.
+func GetUsersSelfJSON200Response(body Self) *Response {
+	return &Response{
+		body:        body,
+		statusCode:  200,
+		contentType: "application/json",
+	}
+}
+
+// GetUsersIDJSON200Response is a constructor method for a GetUsersID response.
+// A *Response is returned with the configured status code and content type from the spec.
+func GetUsersIDJSON200Response(body User) *Response {
+	return &Response{
+		body:        body,
+		statusCode:  200,
+		contentType: "application/json",
+	}
+}
+
+// Getter for additional properties for FoodPreferences_Prefers. Returns the specified
+// element and whether it was found
+func (a FoodPreferences_Prefers) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for FoodPreferences_Prefers
+func (a *FoodPreferences_Prefers) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for FoodPreferences_Prefers to handle AdditionalProperties
+func (a *FoodPreferences_Prefers) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for FoodPreferences_Prefers to handle AdditionalProperties
+func (a FoodPreferences_Prefers) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for UserLikedPosts_Posts. Returns the specified
+// element and whether it was found
+func (a UserLikedPosts_Posts) Get(fieldName string) (value time.Time, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for UserLikedPosts_Posts
+func (a *UserLikedPosts_Posts) Set(fieldName string, value time.Time) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]time.Time)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for UserLikedPosts_Posts to handle AdditionalProperties
+func (a *UserLikedPosts_Posts) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]time.Time)
+		for fieldName, fieldBuf := range object {
+			var fieldVal time.Time
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for UserLikedPosts_Posts to handle AdditionalProperties
+func (a UserLikedPosts_Posts) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
 }
 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/6xUQW/bPAz9KwK/76gk7lbs4FuBbkCADhvQ7lQUg2YxrlqbUkW5rRH4vw+U4zaNg/ay",
-	"UwiFfOR7j/QWKt8GT0iJodwCV7fYmhx+jdFHCSxyFV1IzhOU47Pyf+6wSipi6iKhVZ6UoV5hrtEQog8Y",
-	"k8OM1CKzqVHC1AeEEjhFRzUMg4aID52LaKG8fkm8GTSsz+e9L8k/bRpzj2p9DvoATMPzovaL3aOj9OUU",
-	"Bg0Xvnb0HZOxJpk55I8cmEa1uxTlqGo6O3JqpHjGp2OMv02NlOZ4V7eofjHGxZn8rzpGqzY+ClLtqFYZ",
-	"7lCFQcMlMmeE7UEzfA4u9hJtfGxNghKsSbhIrsU5lIZ2j+r/ETdQwn+rV5NXO4dXb3UZNCR/j3TEIz3y",
-	"dfYjxPX5zNCpckLXE52bTNrRxueOLjWYzUA6+7lWI2LW7Zv3dnHlyKLs1SPGUSUolsXyRIbzAckEByV8",
-	"XhbLQswy6TZLtxrtE0k9Z69EWCNOrS2U42rkgmhaTBgZyustSAk8dBh70ECmlcmESA73+aXYod6dzFHh",
-	"OPWZlzgHgz4OHQzzk4/2XegX7/eyP2h3I3gcPPG4SJ+KQn4qT2m3uSaExlVZj9Udj8v32vI9q6dtzS6+",
-	"PYALX9dolSPFXVUh86Zrml7GOy1O/tkA48fpSPs1PZrGWTUZtnoRTHK5a1sj1yRjyowdy1FOycqQVXsF",
-	"w/A3AAD//wT14JogBQAA",
+	"H4sIAAAAAAAC/+xXUW/jNgz+K4K2R6XJtmIPfivQ7RCgwxW7G3BAURwUi3Z0tSQfJbeXBf7vAyU7qWOn",
+	"Tbdg2MOeqljiJ/L7KJLd8tyZ2lmwwfNsyxF87ayH+OPy0yf6kzsbwAZayrqudC6Ddnb+xTtL33y+BiNp",
+	"9T1CwTP+3XyPOU+7fv4LokPetq3gCnyOuiYQnvE/PCCDbld0aPH6ZJJtDwziZ+ZWXyAPDCE0aEExZ5m0",
+	"mw5I8BpdDRh0CsSA97IEWoZNDTzjPqC2ZbwR4WujERTP7nYH71vBf3VO3SIUgGDzhDNErfRDWugAxk+A",
+	"i/6DRJQb+l1HvHhWKqUpIlndDlCPYaSARx4nJ/bI5PnyeszaB+ueiko+AFtec3Fwi+DfZqWbdR+1DT9f",
+	"0s03rtT2NwhSySDHkO/r5D8z3RGmbV41KqlRkfFIicYDfpZll05DvI9rYJQNsyvaZ40HxQqHhFRqW7II",
+	"d6hfK/it82GsTu4eAT+vpV9Psjq4emJfq9cyenkdzxlZvjULgizfaBFpO82lg/zQiu/Nd+4O4+88otT5",
+	"AFURs7Oq3hc8u3v5PlKLt+KQ+pXGsFZyQ+vCoZGBZ1zJABP6Db3dWd63yRvvO4GGN8C3WuMYfxa0mbhE",
+	"cPMsiV8KaJjxJIR7gOkE+fuS7NVI6KIPh0KOlI7ilY8ySJz0Y6XdP0pgK80JhTG6G4+K3pne2xv9AIre",
+	"oD+iU1qeJlTd4xwrj6fBHNRMisVIbWl3H6ptzApwFGpy4bmJ2MVxHwuOtkXiXIcKYiEEe3W7ZInYWLOo",
+	"ecw+aquAutEjYMpjvrhYXPxADrkarKw1z/hPF4uLBRVKGdYxxHkqnURmV9mIgNh0l4pnqSxHA5QGQuwn",
+	"d1tOJvxrA7jppcpiqnWq7UMM2IB41rZH7PmwiXER1/F5T0HX0vsnh+pF6J1az06/ct29GA4hPy4WZxtC",
+	"+noyMYbcuLIExbRlvslz8L5oqirW3svkwBTuztE5jUpxfGmMkVSZCJDQGk+tq9eBSavYjgsymCOU2ofu",
+	"0U/q/Xt/4n/Jzyp5zyuoc2neI76uOm35ue+6bQlD2XlGn2IvFgfJ8A4CFV3fbU7xdrrz4lwcVwURPCTj",
+	"HQQW1sDyBrGb52hYSKOm0UpV8CRjc7jjpvHhqglrh/rPNH13DG21ao8zFJvlMYbinHvwYMYD5/KauSL6",
+	"2SSwmPhUi/d5r1/O+Nfb/3/iOXX/zf17aZGmw6m0kJFsttoQ8RpZmkROSYy2/SsAAP//AlYMAbIOAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

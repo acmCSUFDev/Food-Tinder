@@ -27,7 +27,7 @@ type AuthorizerServer interface {
 // AuthorizedServer describes a service for a specific user session.
 type AuthorizedServer interface {
 	// Self returns the currently authorized user.
-	Self(context.Context) (*User, error)
+	Self(context.Context) (*Self, error)
 	// Session returns the session information.
 	Session(context.Context) (*Session, error)
 	// Logout invalidates the authorizing token.

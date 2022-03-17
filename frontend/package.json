@@ -9,8 +9,7 @@
     "prepare": "svelte-kit sync",
     "lint": "prettier --ignore-path .gitignore --check --plugin-search-dir=. . && eslint --ignore-path .gitignore .",
     "format": "prettier --ignore-path .gitignore --write --plugin-search-dir=. .",
-    "generate-oapi": "oazapfts ../openapi/foodtinder.json src/lib/foodtinder.ts",
-    "generate": "npm run --silent generate-oapi"
+    "generate": "oazapfts --optimistic ../openapi/foodtinder.json src/lib/foodtinder.ts"
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "next",
@@ -20,7 +19,8 @@
     "eslint-plugin-svelte3": "^3.2.1",
     "prettier": "^2.5.1",
     "prettier-plugin-svelte": "^2.5.0",
-    "svelte": "^3.44.0"
+    "svelte": "^3.44.0",
+    "widdershins": "^4.0.1"
   },
   "type": "module",
   "dependencies": {
