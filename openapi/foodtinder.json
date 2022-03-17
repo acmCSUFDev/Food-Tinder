@@ -7,7 +7,7 @@
   "servers": [
     {
       "url": "https://{hostname}/api/v0",
-      "description": "Version 0 API path",
+      "description": "Version 0 API path.",
       "variables": {
         "hostname": {
           "default": "localhost",
@@ -44,7 +44,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Logged in successfully",
+            "description": "Logged in successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -54,7 +54,10 @@
             }
           },
           "400": {
-            "$ref": "#/components/responses/4XX"
+            "$ref": "#/components/responses/FormError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
           }
         }
       }
@@ -72,11 +75,21 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "password",
+            "in": "query",
+            "required": true,
+            "style": "form",
+            "schema": {
+              "type": "string",
+              "format": "password"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Registered successfully",
+            "description": "Registered successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -86,7 +99,10 @@
             }
           },
           "400": {
-            "$ref": "#/components/responses/4XX"
+            "$ref": "#/components/responses/FormError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
           }
         }
       }
@@ -97,7 +113,7 @@
       ],
       "get": {
         "summary": "Get the current user",
-        "operation": "getSelf",
+        "operationId": "getSelf",
         "responses": {
           "200": {
             "content": {
@@ -107,8 +123,11 @@
                 }
               }
             },
-            "400": {
-              "$ref": "#/components/responses/4XX"
+            "401": {
+              "$ref": "#/components/responses/UnauthorizedError"
+            },
+            "500": {
+              "$ref": "#/components/responses/ServerError"
             }
           }
         }
@@ -120,12 +139,12 @@
       ],
       "get": {
         "summary": "Get a user by their ID",
-        "operation": "getUser",
+        "operationId": "getUser",
         "parameters": [
           {
             "name": "id",
             "in": "path",
-            "description": "The ID of the user",
+            "description": "The ID of the user.",
             "required": true,
             "schema": {
               "$ref": "#/components/schemas/ID"
@@ -151,8 +170,117 @@
                 }
               }
             },
-            "4XX": {
-              "$ref": "#/components/responses/4XX"
+            "400": {
+              "$ref": "#components/responses/FormError"
+            },
+            "401": {
+              "$ref": "#/components/responses/UnauthorizedError"
+            },
+            "500": {
+              "$ref": "#/components/responses/ServerError"
+            }
+          }
+        }
+      }
+    },
+    "/posts": {
+      "x-go-middlewares": [
+        "mustAuthorize"
+      ],
+      "get": {
+        "summary": "Get the next batch of posts",
+        "operationId": "nextPosts",
+        "parameters": [
+          {
+            "name": "prev_id",
+            "in": "query",
+            "description": "The ID to start the pagination from, or empty to start from top.",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            },
+            "400": {
+              "$ref": "#components/responses/FormError"
+            },
+            "401": {
+              "$ref": "#/components/responses/UnauthorizedError"
+            },
+            "500": {
+              "$ref": "#/components/responses/ServerError"
+            }
+          }
+        }
+      }
+    },
+    "/posts/{id}": {
+      "x-go-middlewares": [
+        "mustAuthorize"
+      ],
+      "delete": {
+        "summary": "Delete the current user's posts by ID. A 401 is returned if the user tries to delete someone else's post.",
+        "operationId": "deletePosts",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The post ID to delete.",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All posts successfully deleted"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/posts/liked": {
+      "x-go-middlewares": [
+        "mustAuthorize"
+      ],
+      "get": {
+        "summary": "Get the list of posts liked by the user",
+        "operationId": "getLikedPosts",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Post"
+                  }
+                }
+              }
+            },
+            "401": {
+              "$ref": "#/components/responses/UnauthorizedError"
+            },
+            "500": {
+              "$ref": "#/components/responses/ServerError"
             }
           }
         }
@@ -161,8 +289,48 @@
   },
   "components": {
     "responses": {
-      "4XX": {
-        "description": "User error",
+      "UnauthorizedError": {
+        "description": "Returned when the user isn't logged in.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "NotFoundError": {
+        "description": "Returned when a resource indicated by a parameter (if any) isn't found.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/FormError"
+            }
+          }
+        }
+      },
+      "UserError": {
+        "description": "User error.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "FormError": {
+        "description": "Form error.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/FormError"
+            }
+          }
+        }
+      },
+      "ServerError": {
+        "description": "Unexpected server error.",
         "content": {
           "application/json": {
             "schema": {
@@ -174,7 +342,7 @@
     },
     "schemas": {
       "Error": {
-        "description": "Error object returned on any error",
+        "description": "Error object returned on any error.",
         "example": {
           "message": "server blew up"
         },
@@ -187,17 +355,36 @@
           }
         }
       },
+      "FormError": {
+        "description": "Error object returned on a form error.",
+        "example": {
+          "message": "missing username",
+          "form_id": "username"
+        },
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Error"
+          },
+          {
+            "properties": {
+              "form_id": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
       "ID": {
-        "description": "Snowflake ID",
+        "description": "Snowflake ID.",
         "example": "953809515621527562",
         "type": "string",
-        "x-go-type": "int64"
+        "x-go-type": "foodtinder.ID"
       },
       "LoginMetadata": {
-        "description": "Optional metadata included on login",
+        "description": "Optional metadata included on login.",
         "properties": {
           "user_agent": {
-            "description": "The User-Agent used for logging in",
+            "description": "The User-Agent used for logging in.",
             "example": "curl/7.64.1",
             "type": "string"
           }
@@ -207,7 +394,8 @@
         "required": [
           "user_id",
           "token",
-          "expiry"
+          "expiry",
+          "metadata"
         ],
         "properties": {
           "user_id": {
@@ -230,6 +418,9 @@
         "allOf": [
           {
             "$ref": "#/components/schemas/User"
+          },
+          {
+            "$ref": "#/components/schemas/FoodPreferences"
           },
           {
             "required": [

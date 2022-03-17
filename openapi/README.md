@@ -12,13 +12,15 @@ Base URLs:
 
 <h1 id="openapi-schema-for-food-tinder-default">Default</h1>
 
-## Log in using username and password
+## login
 
 <a id="opIdlogin"></a>
 
 `POST /login`
 
-<h3 id="log-in-using-username-and-password-parameters">Parameters</h3>
+*Log in using username and password*
+
+<h3 id="login-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -40,28 +42,32 @@ Base URLs:
 }
 ```
 
-<h3 id="log-in-using-username-and-password-responses">Responses</h3>
+<h3 id="login-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Logged in successfully|[Session](#schemasession)|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|User error|[Error](#schemaerror)|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Logged in successfully.|[Session](#schemasession)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Form error.|[FormError](#schemaformerror)|
+|500|[Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1)|Unexpected server error.|[Error](#schemaerror)|
 
 <aside class="success">
 This operation does not require authentication
 </aside>
 
-## Register using username and password
+## register
 
 <a id="opIdregister"></a>
 
 `POST /register`
 
-<h3 id="register-using-username-and-password-parameters">Parameters</h3>
+*Register using username and password*
+
+<h3 id="register-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |username|query|string|true|none|
+|password|query|string(password)|true|none|
 
 > Example responses
 
@@ -78,20 +84,25 @@ This operation does not require authentication
 }
 ```
 
-<h3 id="register-using-username-and-password-responses">Responses</h3>
+<h3 id="register-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Registered successfully|[Session](#schemasession)|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|User error|[Error](#schemaerror)|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Registered successfully.|[Session](#schemasession)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Form error.|[FormError](#schemaformerror)|
+|500|[Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1)|Unexpected server error.|[Error](#schemaerror)|
 
 <aside class="success">
 This operation does not require authentication
 </aside>
 
-## Get the current user
+## getSelf
+
+<a id="opIdgetSelf"></a>
 
 `GET /users/self`
+
+*Get the current user*
 
 > Example responses
 
@@ -101,7 +112,7 @@ This operation does not require authentication
 null
 ```
 
-<h3 id="get-the-current-user-responses">Responses</h3>
+<h3 id="getself-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
@@ -111,15 +122,19 @@ null
 This operation does not require authentication
 </aside>
 
-## Get a user by their ID
+## getUser
+
+<a id="opIdgetUser"></a>
 
 `GET /users/{id}`
 
-<h3 id="get-a-user-by-their-id-parameters">Parameters</h3>
+*Get a user by their ID*
+
+<h3 id="getuser-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|[ID](#schemaid)|true|The ID of the user|
+|id|path|[ID](#schemaid)|true|The ID of the user.|
 |password|query|string(password)|true|none|
 
 > Example responses
@@ -135,11 +150,154 @@ This operation does not require authentication
 }
 ```
 
-<h3 id="get-a-user-by-their-id-responses">Responses</h3>
+<h3 id="getuser-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
 |200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|[User](#schemauser)|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## nextPosts
+
+<a id="opIdnextPosts"></a>
+
+`GET /posts`
+
+*Get the next batch of posts*
+
+<h3 id="nextposts-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|prev_id|query|[ID](#schemaid)|false|The ID to start the pagination from, or empty to start from top.|
+
+> Example responses
+
+> 200 Response
+
+```json
+[
+  {
+    "id": "953809515621527562",
+    "name": "food-tinder-user",
+    "avatar": "ypeBEsobvcr6wjGzmiPcTaeG7_gUfE5yuYB3ha_uSLs=",
+    "bio": "Hello, world."
+  }
+]
+```
+
+<h3 id="nextposts-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|Inline|
+
+<h3 id="nextposts-responseschema">Response Schema</h3>
+
+Status Code **200**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|*anonymous*|[[User](#schemauser)]|false|none|none|
+|» id|[ID](#schemaid)|true|none|Snowflake ID.|
+|» name|string|true|none|none|
+|» avatar|string|true|none|none|
+|» bio|string|false|none|none|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## deletePosts
+
+<a id="opIddeletePosts"></a>
+
+`DELETE /posts/{id}`
+
+*Delete the current user's posts by ID. A 401 is returned if the user tries to delete someone else's post.*
+
+<h3 id="deleteposts-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|[ID](#schemaid)|true|The post ID to delete.|
+
+> Example responses
+
+> 401 Response
+
+```json
+{
+  "message": "server blew up"
+}
+```
+
+<h3 id="deleteposts-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|All posts successfully deleted|None|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Returned when the user isn't logged in.|[Error](#schemaerror)|
+|500|[Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1)|Unexpected server error.|[Error](#schemaerror)|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
+## getLikedPosts
+
+<a id="opIdgetLikedPosts"></a>
+
+`GET /posts/liked`
+
+*Get the list of posts liked by the user*
+
+> Example responses
+
+> 200 Response
+
+```json
+[
+  {
+    "id": "953809515621527562",
+    "user_id": "953809515621527562",
+    "cover_hash": "LEHV6nWB2yk8pyoJadR*.7kCMdnj",
+    "images": [
+      "ypeBEsobvcr6wjGzmiPcTaeG7_gUfE5yuYB3ha_uSLs="
+    ],
+    "description": "Salmon roll for $8.\n\nPretty cheap for me.",
+    "tags": [
+      "Salmon",
+      "Sushi Rice"
+    ],
+    "location": "Fullerton, CA"
+  }
+]
+```
+
+<h3 id="getlikedposts-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|Inline|
+
+<h3 id="getlikedposts-responseschema">Response Schema</h3>
+
+Status Code **200**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|*anonymous*|[[Post](#schemapost)]|false|none|none|
+|» id|[ID](#schemaid)|true|none|Snowflake ID.|
+|» user_id|[ID](#schemaid)|true|none|Snowflake ID.|
+|» cover_hash|string|false|none|none|
+|» images|[string]|true|none|none|
+|» description|string|true|none|none|
+|» tags|[string]|true|none|none|
+|» location|string|false|none|Location is the location where the post was made.|
 
 <aside class="success">
 This operation does not require authentication
@@ -161,13 +319,45 @@ This operation does not require authentication
 
 ```
 
-Error object returned on any error
+Error object returned on any error.
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |message|string|true|none|none|
+
+<h2 id="tocS_FormError">FormError</h2>
+<!-- backwards compatibility -->
+<a id="schemaformerror"></a>
+<a id="schema_FormError"></a>
+<a id="tocSformerror"></a>
+<a id="tocsformerror"></a>
+
+```json
+{
+  "message": "missing username",
+  "form_id": "username"
+}
+
+```
+
+Error object returned on a form error.
+
+### Properties
+
+allOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|*anonymous*|[Error](#schemaerror)|false|none|Error object returned on any error.|
+
+and
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|*anonymous*|object|false|none|none|
+|» form_id|string|false|none|none|
 
 <h2 id="tocS_ID">ID</h2>
 <!-- backwards compatibility -->
@@ -181,13 +371,13 @@ Error object returned on any error
 
 ```
 
-Snowflake ID
+Snowflake ID.
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|*anonymous*|string|false|none|Snowflake ID|
+|*anonymous*|string|false|none|Snowflake ID.|
 
 <h2 id="tocS_LoginMetadata">LoginMetadata</h2>
 <!-- backwards compatibility -->
@@ -203,13 +393,13 @@ Snowflake ID
 
 ```
 
-Optional metadata included on login
+Optional metadata included on login.
 
 ### Properties
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|user_agent|string|false|none|The User-Agent used for logging in|
+|user_agent|string|false|none|The User-Agent used for logging in.|
 
 <h2 id="tocS_Session">Session</h2>
 <!-- backwards compatibility -->
@@ -234,10 +424,10 @@ Optional metadata included on login
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|user_id|[ID](#schemaid)|true|none|Snowflake ID|
+|user_id|[ID](#schemaid)|true|none|Snowflake ID.|
 |token|string|true|none|none|
 |expiry|string(date-time)|true|none|none|
-|metadata|[LoginMetadata](#schemaloginmetadata)|false|none|Optional metadata included on login|
+|metadata|[LoginMetadata](#schemaloginmetadata)|true|none|Optional metadata included on login.|
 
 <h2 id="tocS_Self">Self</h2>
 <!-- backwards compatibility -->
@@ -258,6 +448,12 @@ allOf
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |*anonymous*|[User](#schemauser)|false|none|none|
+
+and
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|*anonymous*|[FoodPreferences](#schemafoodpreferences)|false|none|none|
 
 and
 
@@ -287,7 +483,7 @@ and
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|[ID](#schemaid)|true|none|Snowflake ID|
+|id|[ID](#schemaid)|true|none|Snowflake ID.|
 |name|string|true|none|none|
 |avatar|string|true|none|none|
 |bio|string|false|none|none|
@@ -383,8 +579,8 @@ and
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|[ID](#schemaid)|true|none|Snowflake ID|
-|user_id|[ID](#schemaid)|true|none|Snowflake ID|
+|id|[ID](#schemaid)|true|none|Snowflake ID.|
+|user_id|[ID](#schemaid)|true|none|Snowflake ID.|
 |cover_hash|string|false|none|none|
 |images|[string]|true|none|none|
 |description|string|true|none|none|
