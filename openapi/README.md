@@ -150,7 +150,9 @@ This operation does not require authentication
 <a id="tocserror"></a>
 
 ```json
-"server blew up"
+{
+  "message": "server blew up"
+}
 
 ```
 
@@ -299,24 +301,13 @@ and
     "Fish"
   ],
   "prefers": {
-    "property1": {
-      "Rice": [
-        "Sushi Rice"
-      ],
-      "Fish": [
-        "Ahi Tuna",
-        "Salmon"
-      ]
-    },
-    "property2": {
-      "Rice": [
-        "Sushi Rice"
-      ],
-      "Fish": [
-        "Ahi Tuna",
-        "Salmon"
-      ]
-    }
+    "Rice": [
+      "Sushi Rice"
+    ],
+    "Fish": [
+      "Ahi Tuna",
+      "Salmon"
+    ]
   }
 }
 
@@ -378,7 +369,7 @@ and
     "Salmon",
     "Sushi Rice"
   ],
-  "location": "string"
+  "location": "Fullerton, CA"
 }
 
 ```

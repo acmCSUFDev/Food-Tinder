@@ -173,7 +173,9 @@
     "schemas": {
       "Error": {
         "description": "Error object returned on any error",
-        "example": "server blew up",
+        "example": {
+          "message": "server blew up"
+        },
         "required": [
           "message"
         ],
@@ -286,16 +288,16 @@
               "type": "array",
               "items": {
                 "type": "string"
-              },
-              "example": {
-                "Rice": [
-                  "Sushi Rice"
-                ],
-                "Fish": [
-                  "Ahi Tuna",
-                  "Salmon"
-                ]
               }
+            },
+            "example": {
+              "Rice": [
+                "Sushi Rice"
+              ],
+              "Fish": [
+                "Ahi Tuna",
+                "Salmon"
+              ]
             }
           }
         }
@@ -375,7 +377,8 @@
           },
           "location": {
             "type": "string",
-            "description": "Location is the location where the post was made."
+            "description": "Location is the location where the post was made.",
+			"example": "Fullerton, CA"
           }
         }
       }
