@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/acmCSUFDev/Food-Tinder/backend/dataset/foods"
@@ -92,6 +93,9 @@ func (set foodSet) toList() foods.Items {
 	for item := range set {
 		items = append(items, foods.Name(item))
 	}
+	sort.Slice(items, func(i, j int) bool {
+		return items[i] < items[j]
+	})
 	return items
 }
 
