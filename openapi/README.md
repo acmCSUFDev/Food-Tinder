@@ -4,6 +4,12 @@
 
 > Scroll down for code samples, example requests and responses. Select a language for code samples from the tabs above or the mobile navigation menu.
 
+Base URLs:
+
+* <a href="https://{hostname}/api/v0">https://{hostname}/api/v0</a>
+
+    * **hostname** - The domain of the API backend server Default: localhost
+
 <h1 id="openapi-schema-for-food-tinder-default">Default</h1>
 
 ## Log in using username and password
@@ -56,7 +62,6 @@ This operation does not require authentication
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |username|query|string|true|none|
-|password|query|string(password)|true|none|
 
 > Example responses
 

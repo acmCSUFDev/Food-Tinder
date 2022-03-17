@@ -7,10 +7,14 @@
 import * as Oazapfts from "oazapfts/lib/runtime";
 import * as QS from "oazapfts/lib/runtime/query";
 export const defaults: Oazapfts.RequestOpts = {
-    baseUrl: "/",
+    baseUrl: "https://localhost/api/v0",
 };
 const oazapfts = Oazapfts.runtime(defaults);
-export const servers = {};
+export const servers = {
+    version0ApiPath: ({ hostname = "localhost" }: {
+        hostname: string | number | boolean;
+    }) => `https://${hostname}/api/v0`
+};
 export type Id = string;
 export type LoginMetadata = {
     user_agent?: string;
@@ -54,7 +58,7 @@ export function login(username: string, password: string, opts?: Oazapfts.Reques
 /**
  * Register using username and password
  */
-export function register(username: string, password: string, opts?: Oazapfts.RequestOpts) {
+export function register(username: string, opts?: Oazapfts.RequestOpts) {
     return oazapfts.ok(oazapfts.fetchJson<{
         status: 200;
         data: Session;
@@ -62,8 +66,7 @@ export function register(username: string, password: string, opts?: Oazapfts.Req
         status: 400;
         data: Error;
     }>(`/register${QS.query(QS.form({
-        username,
-        password
+        username
     }))}`, {
         ...opts,
         method: "POST"
