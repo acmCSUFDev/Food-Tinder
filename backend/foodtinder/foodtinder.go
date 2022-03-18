@@ -1,6 +1,7 @@
 package foodtinder
 
 import (
+	"errors"
 	"time"
 
 	"github.com/acmCSUFDev/Food-Tinder/backend/dataset/foods"
@@ -14,9 +15,11 @@ const SnowflakeEpoch = int64(1577865600 * (time.Second / time.Millisecond))
 
 func init() { snowflake.Epoch = SnowflakeEpoch }
 
-// AssetHash is a hash pointing to a static asset whose type is determined by
-// the URL extension.
-type AssetHash string
+// Error constants.
+var (
+	// ErrNotFound is used when a resource is not found.
+	ErrNotFound = errors.New("not found")
+)
 
 // Date describes a Date with undefined time.
 type Date struct {
@@ -34,10 +37,6 @@ func (d Date) String() string {
 func (d Date) Time() time.Time {
 	return time.Date(int(d.Y), time.Month(d.M), int(d.D), 0, 0, 0, 0, time.Local)
 }
-
-// BlurHash describes a string that is a hashed version of any image. The string
-// is hashed using the Blurhash algorithm.
-type BlurHash string
 
 // ID is the Snowflake ID type for an entity. An inherent property of Snowflake
 // IDs is that creation time is embedded inside the ID itself. Thus, all IDs,
@@ -98,7 +97,7 @@ type User struct {
 	// Name is the username which can contain spaces.
 	Name string
 	// Avatar is the asset hash string that can be used to create a URL.
-	Avatar AssetHash
+	Avatar string
 	// Bio is the user biography (or description).
 	Bio string
 }
@@ -130,10 +129,10 @@ type Post struct {
 	// UserID is the ID of the user who posted the food item.
 	UserID ID
 	// CoverHash is the blur hash of the cover image.
-	CoverHash BlurHash
+	CoverHash string
 	// Images is the list of image asset hashes for this food item. The first
 	// image should be used as the cover.
-	Images []AssetHash
+	Images []string
 	// Description contains the description of the food item.
 	Description string
 	// Tags is a list of food names that this post is relevant to. It can be

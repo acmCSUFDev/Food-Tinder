@@ -3,22 +3,20 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"io/fs"
 	"net/http"
+	"strings"
 
 	"github.com/acmCSUFDev/Food-Tinder/backend/foodtinder"
-	"github.com/acmCSUFDev/Food-Tinder/backend/internal/api/openapi"
+	"github.com/acmCSUFDev/Food-Tinder/backend/internal/api/oapi"
+	"github.com/discord-gophers/goapi-gen/pkg/middleware"
 	"github.com/discord-gophers/goapi-gen/pkg/types"
+	"github.com/getkin/kin-openapi/openapi3filter"
+	"github.com/go-chi/chi/v5"
 )
-
-// Handler creates a new API handler.
-func Handler(server foodtinder.Server) http.Handler {
-	handler := handler{server}
-	return openapi.Handler(
-		handler,
-		openapi.WithMiddleware("mustAuthorize", handler.mustAuthorize),
-		openapi.WithErrorHandler(handler.onError),
-	)
-}
 
 type ctxKey uint8
 
@@ -27,44 +25,71 @@ const (
 	sessionKey
 )
 
-// SessionFromContext gets the session struct from the given context.
-func SessionFromContext(ctx context.Context) *foodtinder.Session {
-	s, _ := ctx.Value(sessionKey).(*foodtinder.Session)
-	return s
+// Handler creates a new API handler.
+func Handler(server foodtinder.Server) http.Handler {
+	handler := handler{server}
+	h := oapi.Handler(handler, oapi.WithErrorHandler(handler.onError))
+
+	validator := middleware.OapiRequestValidatorWithOptions(nil, &middleware.Options{
+		Options: openapi3filter.Options{
+			AuthenticationFunc: handler.authenticate,
+		},
+	})
+
+	r := chi.NewRouter()
+	r.Use(injectSessionBox)
+	r.Use(validator)
+	r.Mount("/", h)
+
+	return r
 }
 
 type handler struct {
-	server foodtinder.Server
+	Server foodtinder.Server
+}
+
+type authError struct {
+	error
 }
 
 func (h handler) onError(w http.ResponseWriter, r *http.Request, err error) {
-	h.writeError(w, 400, err)
+	switch err := err.(type) {
+	case oapi.ParameterError:
+		respondJSON(w, 400, oapi.FormError{
+			FormID: optstr(err.ParamName()),
+			Error:  oapi.RespErr(err),
+		})
+	case authError:
+		respondJSON(w, 401, oapi.RespErr(err))
+	default:
+		respondJSON(w, 400, oapi.RespErr(err))
+	}
 }
 
-func (h handler) writeError(w http.ResponseWriter, code int, err error) {
-	w.WriteHeader(code)
-	json.NewEncoder(w).Encode(openapi.Error{
-		Message: err.Error(),
-	})
-}
-
-func (h handler) mustAuthorize(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token := r.Header.Get("Authorization")
-
-		s, err := h.server.AuthorizerServer().Authorize(r.Context(), token)
-		if err != nil {
-			h.onError(w, r, err)
-			return
+func (h handler) authenticate(ctx context.Context, in *openapi3filter.AuthenticationInput) error {
+	switch in.SecuritySchemeName {
+	case "BearerAuth":
+		auth := in.RequestValidationInput.Request.Header.Get("Authorization")
+		if !strings.HasPrefix(auth, "Bearer ") {
+			return fmt.Errorf("invalid BearerAuth header: missing prefix")
 		}
 
-		ctx := context.WithValue(r.Context(), sessionKey, s)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+		auth = strings.TrimPrefix(auth, "Bearer ")
+
+		s, err := h.Server.AuthorizerServer().Authorize(ctx, auth)
+		if err != nil {
+			return authError{err}
+		}
+
+		authorizeRequest(in.RequestValidationInput.Request, s)
+		return nil
+	default:
+		return fmt.Errorf("unsupported auth scheme %q", in.SecuritySchemeName)
+	}
 }
 
-func (h handler) Login(w http.ResponseWriter, r *http.Request, params openapi.LoginParams) {
-	s, err := h.server.LoginServer().Login(
+func (h handler) Login(w http.ResponseWriter, r *http.Request, params oapi.LoginParams) *oapi.Response {
+	s, err := h.Server.LoginServer().Login(
 		r.Context(),
 		params.Username, params.Password,
 		foodtinder.LoginMetadata{
@@ -72,22 +97,21 @@ func (h handler) Login(w http.ResponseWriter, r *http.Request, params openapi.Lo
 		},
 	)
 	if err != nil {
-		h.writeError(w, 401, err)
-		return
+		return oapi.LoginJSON401Response(oapi.RespErr(err))
 	}
 
-	openapi.LoginJSON200Response(openapi.Session{
-		UserID: openapi.ID(s.UserID),
+	return oapi.LoginJSON200Response(oapi.Session{
+		UserID: oapi.ID(s.UserID),
 		Token:  s.Token,
 		Expiry: s.Expiry,
-		Metadata: openapi.LoginMetadata{
+		Metadata: oapi.LoginMetadata{
 			UserAgent: optstr(s.Metadata.UserAgent),
 		},
 	})
 }
 
-func (h handler) Register(w http.ResponseWriter, r *http.Request, params openapi.RegisterParams) {
-	s, err := h.server.LoginServer().Register(
+func (h handler) Register(w http.ResponseWriter, r *http.Request, params oapi.RegisterParams) *oapi.Response {
+	s, err := h.Server.LoginServer().Register(
 		r.Context(),
 		params.Username, params.Password,
 		foodtinder.LoginMetadata{
@@ -95,33 +119,34 @@ func (h handler) Register(w http.ResponseWriter, r *http.Request, params openapi
 		},
 	)
 	if err != nil {
-		h.writeError(w, 400, err)
-		return
+		return oapi.RegisterJSON400Response(oapi.FormError{
+			Error: oapi.RespErr(err),
+		})
 	}
 
-	openapi.LoginJSON200Response(openapi.Session{
-		UserID: openapi.ID(s.UserID),
+	return oapi.LoginJSON200Response(oapi.Session{
+		UserID: oapi.ID(s.UserID),
 		Token:  s.Token,
 		Expiry: s.Expiry,
-		Metadata: openapi.LoginMetadata{
+		Metadata: oapi.LoginMetadata{
 			UserAgent: optstr(s.Metadata.UserAgent),
 		},
 	})
 }
 
-func (h handler) GetUsersSelf(w http.ResponseWriter, r *http.Request) {
-	srv := h.server.AuthorizedServer(SessionFromContext(r.Context()))
+func (h handler) GetSelf(w http.ResponseWriter, r *http.Request) *oapi.Response {
+	srv := h.Server.AuthorizedServer(sessionFromContext(r.Context()))
 
 	self, err := srv.Self(r.Context())
 	if err != nil {
-		h.writeError(w, 500, err)
+		return oapi.GetSelfJSON500Response(oapi.RespErr(err))
 	}
 
-	openapi.GetUsersSelfJSON200Response(openapi.Self{
-		User: openapi.User{
+	return oapi.GetSelfJSON200Response(oapi.Self{
+		User: oapi.User{
 			Avatar: string(self.Avatar),
 			Bio:    optstr(self.Bio),
-			ID:     openapi.ID(self.ID),
+			ID:     oapi.ID(self.ID),
 			Name:   self.Name,
 		},
 		Birthday: types.Date{
@@ -130,21 +155,114 @@ func (h handler) GetUsersSelf(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (h handler) GetUsersID(w http.ResponseWriter, r *http.Request, id openapi.ID, params openapi.GetUsersIDParams) {
-	asrv := h.server.AuthorizedServer(SessionFromContext(r.Context()))
+func (h handler) GetUser(w http.ResponseWriter, r *http.Request, id oapi.ID, params oapi.GetUserParams) *oapi.Response {
+	asrv := h.Server.AuthorizedServer(sessionFromContext(r.Context()))
 	usrv := asrv.UserServer()
 
 	u, err := usrv.User(r.Context(), foodtinder.ID(id))
 	if err != nil {
-		h.writeError(w, 500, err)
+		if errors.Is(err, foodtinder.ErrNotFound) {
+			return oapi.GetUserJSON404Response(oapi.FormError{
+				FormID: optstr("id"),
+				Error:  oapi.RespErr(err),
+			})
+		}
+		return oapi.GetUserJSON500Response(oapi.RespErr(err))
 	}
 
-	openapi.GetUsersIDJSON200Response(openapi.User{
+	return oapi.GetUserJSON200Response(oapi.User{
 		Avatar: string(u.Avatar),
 		Bio:    optstr(u.Bio),
-		ID:     openapi.ID(u.ID),
+		ID:     oapi.ID(u.ID),
 		Name:   u.Name,
 	})
+}
+
+func (h handler) GetNextPosts(w http.ResponseWriter, r *http.Request, params oapi.GetNextPostsParams) *oapi.Response {
+	asrv := h.Server.AuthorizedServer(sessionFromContext(r.Context()))
+	psrv := asrv.PostServer()
+
+	var prevID foodtinder.ID
+	if params.PrevID != nil {
+		prevID = foodtinder.ID(*params.PrevID)
+	}
+
+	p, err := psrv.NextPosts(r.Context(), prevID)
+	if err != nil {
+		return oapi.GetNextPostsJSON400Response(oapi.FormError{
+			FormID: optstr("prev_id"),
+			Error:  oapi.RespErr(err),
+		})
+	}
+
+	return oapi.GetNextPostsJSON200Response(convertPostsToOAPI(p))
+}
+
+func (h handler) DeletePost(w http.ResponseWriter, r *http.Request, id oapi.ID) *oapi.Response {
+	asrv := h.Server.AuthorizedServer(sessionFromContext(r.Context()))
+	psrv := asrv.PostServer()
+
+	if err := psrv.DeletePost(r.Context(), foodtinder.ID(id)); err != nil {
+		if errors.Is(err, foodtinder.ErrNotFound) {
+			return oapi.DeletePostJSON404Response(oapi.FormError{
+				FormID: optstr("id"),
+				Error:  oapi.RespErr(err),
+			})
+		}
+		return oapi.DeletePostJSON500Response(oapi.RespErr(err))
+	}
+
+	return nil
+}
+
+func (h handler) GetLikedPosts(w http.ResponseWriter, r *http.Request) *oapi.Response {
+	asrv := h.Server.AuthorizedServer(sessionFromContext(r.Context()))
+	psrv := asrv.PostServer()
+
+	p, err := psrv.LikedPosts(r.Context())
+	if err != nil {
+		return oapi.GetLikedPostsJSON500Response(oapi.RespErr(err))
+	}
+
+	return oapi.GetLikedPostsJSON200Response(convertPostsToOAPI(p))
+}
+
+func (h handler) GetAsset(w http.ResponseWriter, r *http.Request, id string) *oapi.Response {
+	f, err := h.Server.AssetServer().Open(id)
+	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			return oapi.GetAssetJSON404Response(oapi.FormError{
+				FormID: optstr("id"),
+				Error:  oapi.RespErr(err),
+			})
+		}
+		return oapi.GetAssetJSON500Response(oapi.RespErr(err))
+	}
+	defer f.Close()
+
+	// No error-handling can be done here.
+	io.Copy(w, f)
+	return nil
+}
+
+func convertPostsToOAPI(posts []foodtinder.Post) []oapi.Post {
+	conv := make([]oapi.Post, len(posts))
+	for i, p := range posts {
+		conv[i] = convertPostToOAPI(p)
+	}
+	return conv
+}
+
+func convertPostToOAPI(post foodtinder.Post) oapi.Post {
+	return oapi.Post{
+		ID:          oapi.ID(post.ID),
+		UserID:      oapi.ID(post.UserID),
+		CoverHash:   optstr(post.CoverHash),
+		Images:      post.Images,
+		Description: post.Description,
+		Tags:        post.Tags,
+		Location:    optstr(post.Location),
+	}
 }
 
 func optstr(str string) *string {
@@ -152,4 +270,9 @@ func optstr(str string) *string {
 		return &str
 	}
 	return nil
+}
+
+func respondJSON(w http.ResponseWriter, code int, v interface{}) {
+	w.WriteHeader(code)
+	json.NewEncoder(w).Encode(v)
 }

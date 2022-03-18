@@ -10,6 +10,10 @@ Base URLs:
 
     * **hostname** - The domain of the API backend server Default: localhost
 
+# Authentication
+
+- HTTP Authentication, scheme: bearer 
+
 <h1 id="openapi-schema-for-food-tinder-default">Default</h1>
 
 ## login
@@ -18,7 +22,7 @@ Base URLs:
 
 `POST /login`
 
-*Log in using username and password*
+*Log in using username and password. A 401 is returned if the information is incorrect.*
 
 <h3 id="login-parameters">Parameters</h3>
 
@@ -47,7 +51,7 @@ Base URLs:
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
 |200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Logged in successfully.|[Session](#schemasession)|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Form error.|[FormError](#schemaformerror)|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|401 Unauthorized returned when the user enters the wrong username and password combination.|[Error](#schemaerror)|
 |500|[Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1)|Unexpected server error.|[Error](#schemaerror)|
 
 <aside class="success">
@@ -117,9 +121,11 @@ null
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
 |200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|[Self](#schemaself)|
+|500|[Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1)|Unexpected server error.|[Error](#schemaerror)|
 
-<aside class="success">
-This operation does not require authentication
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+BearerAuth
 </aside>
 
 ## getUser
@@ -155,20 +161,24 @@ This operation does not require authentication
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
 |200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|[User](#schemauser)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Form error.|[FormError](#schemaformerror)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|Resource indicated by a parameter (if any) isn't found.|[FormError](#schemaformerror)|
+|500|[Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1)|Unexpected server error.|[Error](#schemaerror)|
 
-<aside class="success">
-This operation does not require authentication
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+BearerAuth
 </aside>
 
-## nextPosts
+## getNextPosts
 
-<a id="opIdnextPosts"></a>
+<a id="opIdgetNextPosts"></a>
 
 `GET /posts`
 
 *Get the next batch of posts*
 
-<h3 id="nextposts-parameters">Parameters</h3>
+<h3 id="getnextposts-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -182,44 +192,58 @@ This operation does not require authentication
 [
   {
     "id": "953809515621527562",
-    "name": "food-tinder-user",
-    "avatar": "ypeBEsobvcr6wjGzmiPcTaeG7_gUfE5yuYB3ha_uSLs=",
-    "bio": "Hello, world."
+    "user_id": "953809515621527562",
+    "cover_hash": "LEHV6nWB2yk8pyoJadR*.7kCMdnj",
+    "images": [
+      "ypeBEsobvcr6wjGzmiPcTaeG7_gUfE5yuYB3ha_uSLs="
+    ],
+    "description": "Salmon roll for $8.\n\nPretty cheap for me.",
+    "tags": [
+      "Salmon",
+      "Sushi Rice"
+    ],
+    "location": "Fullerton, CA"
   }
 ]
 ```
 
-<h3 id="nextposts-responses">Responses</h3>
+<h3 id="getnextposts-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
 |200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|Inline|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Form error.|[FormError](#schemaformerror)|
+|500|[Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1)|Unexpected server error.|[Error](#schemaerror)|
 
-<h3 id="nextposts-responseschema">Response Schema</h3>
+<h3 id="getnextposts-responseschema">Response Schema</h3>
 
 Status Code **200**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|*anonymous*|[[User](#schemauser)]|false|none|none|
+|*anonymous*|[[Post](#schemapost)]|false|none|none|
 |» id|[ID](#schemaid)|true|none|Snowflake ID.|
-|» name|string|true|none|none|
-|» avatar|string|true|none|none|
-|» bio|string|false|none|none|
+|» user_id|[ID](#schemaid)|true|none|Snowflake ID.|
+|» cover_hash|string|false|none|none|
+|» images|[string]|true|none|none|
+|» description|string|true|none|none|
+|» tags|[string]|true|none|none|
+|» location|string|false|none|Location is the location where the post was made.|
 
-<aside class="success">
-This operation does not require authentication
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+BearerAuth
 </aside>
 
-## deletePosts
+## deletePost
 
-<a id="opIddeletePosts"></a>
+<a id="opIddeletePost"></a>
 
 `DELETE /posts/{id}`
 
 *Delete the current user's posts by ID. A 401 is returned if the user tries to delete someone else's post.*
 
-<h3 id="deleteposts-parameters">Parameters</h3>
+<h3 id="deletepost-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -227,24 +251,26 @@ This operation does not require authentication
 
 > Example responses
 
-> 401 Response
+> 404 Response
 
 ```json
 {
-  "message": "server blew up"
+  "message": "missing username",
+  "form_id": "username"
 }
 ```
 
-<h3 id="deleteposts-responses">Responses</h3>
+<h3 id="deletepost-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|All posts successfully deleted|None|
-|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Returned when the user isn't logged in.|[Error](#schemaerror)|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|All posts successfully deleted.|None|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|Resource indicated by a parameter (if any) isn't found.|[FormError](#schemaformerror)|
 |500|[Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1)|Unexpected server error.|[Error](#schemaerror)|
 
-<aside class="success">
-This operation does not require authentication
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+BearerAuth
 </aside>
 
 ## getLikedPosts
@@ -283,6 +309,7 @@ This operation does not require authentication
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
 |200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|Inline|
+|500|[Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1)|Unexpected server error.|[Error](#schemaerror)|
 
 <h3 id="getlikedposts-responseschema">Response Schema</h3>
 
@@ -299,8 +326,49 @@ Status Code **200**
 |» tags|[string]|true|none|none|
 |» location|string|false|none|Location is the location where the post was made.|
 
-<aside class="success">
-This operation does not require authentication
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+BearerAuth
+</aside>
+
+## getAsset
+
+<a id="opIdgetAsset"></a>
+
+`GET /assets/{id}`
+
+*Get the file asset by the given ID. Note that assets are not separated by type; the user must assume the type from the context that the asset ID is from.*
+
+<h3 id="getasset-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|string|true|The asset ID to fetch.|
+
+> Example responses
+
+> 200 Response
+
+> 404 Response
+
+```json
+{
+  "message": "missing username",
+  "form_id": "username"
+}
+```
+
+<h3 id="getasset-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|string|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|Resource indicated by a parameter (if any) isn't found.|[FormError](#schemaformerror)|
+|500|[Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1)|Unexpected server error.|[Error](#schemaerror)|
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+BearerAuth
 </aside>
 
 # Schemas

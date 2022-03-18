@@ -16,11 +16,17 @@
       }
     }
   ],
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ],
   "paths": {
     "/login": {
       "post": {
-        "summary": "Log in using username and password",
+        "summary": "Log in using username and password. A 401 is returned if the information is incorrect.",
         "operationId": "login",
+        "security": [],
         "parameters": [
           {
             "name": "username",
@@ -53,8 +59,15 @@
               }
             }
           },
-          "400": {
-            "$ref": "#/components/responses/FormError"
+          "401": {
+            "description": "401 Unauthorized returned when the user enters the wrong username and password combination.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
@@ -66,6 +79,7 @@
       "post": {
         "summary": "Register using username and password",
         "operationId": "register",
+        "security": [],
         "parameters": [
           {
             "name": "username",
@@ -108,9 +122,6 @@
       }
     },
     "/users/self": {
-      "x-go-middlewares": [
-        "mustAuthorize"
-      ],
       "get": {
         "summary": "Get the current user",
         "operationId": "getSelf",
@@ -122,21 +133,15 @@
                   "$ref": "#/components/schemas/Self"
                 }
               }
-            },
-            "401": {
-              "$ref": "#/components/responses/UnauthorizedError"
-            },
-            "500": {
-              "$ref": "#/components/responses/ServerError"
             }
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
           }
         }
       }
     },
     "/users/{id}": {
-      "x-go-middlewares": [
-        "mustAuthorize"
-      ],
       "get": {
         "summary": "Get a user by their ID",
         "operationId": "getUser",
@@ -169,27 +174,24 @@
                   "$ref": "#/components/schemas/User"
                 }
               }
-            },
-            "400": {
-              "$ref": "#components/responses/FormError"
-            },
-            "401": {
-              "$ref": "#/components/responses/UnauthorizedError"
-            },
-            "500": {
-              "$ref": "#/components/responses/ServerError"
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/FormError"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
           }
         }
       }
     },
     "/posts": {
-      "x-go-middlewares": [
-        "mustAuthorize"
-      ],
       "get": {
         "summary": "Get the next batch of posts",
-        "operationId": "nextPosts",
+        "operationId": "getNextPosts",
         "parameters": [
           {
             "name": "prev_id",
@@ -208,31 +210,25 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/User"
+                    "$ref": "#/components/schemas/Post"
                   }
                 }
               }
-            },
-            "400": {
-              "$ref": "#components/responses/FormError"
-            },
-            "401": {
-              "$ref": "#/components/responses/UnauthorizedError"
-            },
-            "500": {
-              "$ref": "#/components/responses/ServerError"
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/FormError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
           }
         }
       }
     },
     "/posts/{id}": {
-      "x-go-middlewares": [
-        "mustAuthorize"
-      ],
       "delete": {
         "summary": "Delete the current user's posts by ID. A 401 is returned if the user tries to delete someone else's post.",
-        "operationId": "deletePosts",
+        "operationId": "deletePost",
         "parameters": [
           {
             "name": "id",
@@ -246,10 +242,10 @@
         ],
         "responses": {
           "200": {
-            "description": "All posts successfully deleted"
+            "description": "All posts successfully deleted."
           },
-          "401": {
-            "$ref": "#/components/responses/UnauthorizedError"
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
           },
           "500": {
             "$ref": "#/components/responses/ServerError"
@@ -258,9 +254,6 @@
       }
     },
     "/posts/liked": {
-      "x-go-middlewares": [
-        "mustAuthorize"
-      ],
       "get": {
         "summary": "Get the list of posts liked by the user",
         "operationId": "getLikedPosts",
@@ -275,32 +268,60 @@
                   }
                 }
               }
-            },
-            "401": {
-              "$ref": "#/components/responses/UnauthorizedError"
-            },
-            "500": {
-              "$ref": "#/components/responses/ServerError"
             }
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/assets/{id}": {
+      "get": {
+        "summary": "Get the file asset by the given ID. Note that assets are not separated by type; the user must assume the type from the context that the asset ID is from.",
+        "operationId": "getAsset",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The asset ID to fetch.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
           }
         }
       }
     }
   },
   "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
     "responses": {
-      "UnauthorizedError": {
-        "description": "Returned when the user isn't logged in.",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/Error"
-            }
-          }
-        }
-      },
       "NotFoundError": {
-        "description": "Returned when a resource indicated by a parameter (if any) isn't found.",
+        "description": "Resource indicated by a parameter (if any) isn't found.",
         "content": {
           "application/json": {
             "schema": {

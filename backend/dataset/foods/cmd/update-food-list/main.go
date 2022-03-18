@@ -13,6 +13,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/acmCSUFDev/Food-Tinder/backend/dataset/foods"
 )
@@ -26,9 +27,29 @@ var (
 func init() {
 	flag.StringVar(&output, "o", output, "output path, - for stdout")
 	flag.Parse()
+
+	http.DefaultClient.Timeout = 10 * time.Second
 }
 
 func main() {
+	out := os.Stdout
+
+	if output != "-" {
+		s, err := os.Stat(output)
+		if err == nil && !s.IsDir() {
+			log.Printf("%s already exists, skipping", output)
+			return
+		}
+
+		f, err := os.OpenFile(output, os.O_CREATE|os.O_WRONLY, os.ModePerm)
+		if err != nil {
+			log.Fatalln("cannot make output file:", err)
+		}
+		defer f.Close()
+
+		out = f
+	}
+
 	r, err := http.Get(src)
 	if err != nil {
 		log.Fatalln("cannot get food_types.rtf:", err)
@@ -38,17 +59,6 @@ func main() {
 	strmap, err := scanFoods(r.Body)
 	if err != nil {
 		log.Fatalln("cannot scan food_types.rtf:", err)
-	}
-
-	out := os.Stdout
-
-	if output != "-" {
-		f, err := os.OpenFile(output, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, os.ModePerm)
-		if err != nil {
-			log.Fatalln("cannot make output file:", err)
-		}
-		defer f.Close()
-		out = f
 	}
 
 	enc := json.NewEncoder(out)

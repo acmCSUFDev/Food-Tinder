@@ -1,9 +1,13 @@
 package foodtinder
 
-import "context"
+import (
+	"context"
+	"io/fs"
+)
 
 // Server describes the top-level server information.
 type Server interface {
+	AssetServer() fs.FS
 	LoginServer() LoginServer
 	AuthorizerServer() AuthorizerServer
 	AuthorizedServer(s *Session) AuthorizedServer

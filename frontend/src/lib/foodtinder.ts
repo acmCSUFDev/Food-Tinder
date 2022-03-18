@@ -56,15 +56,15 @@ export type Post = {
     location?: string;
 };
 /**
- * Log in using username and password
+ * Log in using username and password. A 401 is returned if the information is incorrect.
  */
 export function login(username: string, password: string, opts?: Oazapfts.RequestOpts) {
     return oazapfts.ok(oazapfts.fetchJson<{
         status: 200;
         data: Session;
     } | {
-        status: 400;
-        data: FormError;
+        status: 401;
+        data: Error;
     } | {
         status: 500;
         data: Error;
@@ -104,6 +104,9 @@ export function getSelf(opts?: Oazapfts.RequestOpts) {
     return oazapfts.ok(oazapfts.fetchJson<{
         status: 200;
         data: Self;
+    } | {
+        status: 500;
+        data: Error;
     }>("/users/self", {
         ...opts
     }));
@@ -115,6 +118,15 @@ export function getUser(id: Id, password: string, opts?: Oazapfts.RequestOpts) {
     return oazapfts.ok(oazapfts.fetchJson<{
         status: 200;
         data: User;
+    } | {
+        status: 400;
+        data: FormError;
+    } | {
+        status: 404;
+        data: FormError;
+    } | {
+        status: 500;
+        data: Error;
     }>(`/users/${id}${QS.query(QS.form({
         password
     }))}`, {
@@ -124,12 +136,18 @@ export function getUser(id: Id, password: string, opts?: Oazapfts.RequestOpts) {
 /**
  * Get the next batch of posts
  */
-export function nextPosts({ prevId }: {
+export function getNextPosts({ prevId }: {
     prevId?: Id;
 } = {}, opts?: Oazapfts.RequestOpts) {
     return oazapfts.ok(oazapfts.fetchJson<{
         status: 200;
-        data: User[];
+        data: Post[];
+    } | {
+        status: 400;
+        data: FormError;
+    } | {
+        status: 500;
+        data: Error;
     }>(`/posts${QS.query(QS.form({
         prev_id: prevId
     }))}`, {
@@ -139,12 +157,12 @@ export function nextPosts({ prevId }: {
 /**
  * Delete the current user's posts by ID. A 401 is returned if the user tries to delete someone else's post.
  */
-export function deletePosts(id: Id, opts?: Oazapfts.RequestOpts) {
+export function deletePost(id: Id, opts?: Oazapfts.RequestOpts) {
     return oazapfts.ok(oazapfts.fetchJson<{
         status: 200;
     } | {
-        status: 401;
-        data: Error;
+        status: 404;
+        data: FormError;
     } | {
         status: 500;
         data: Error;
@@ -160,7 +178,27 @@ export function getLikedPosts(opts?: Oazapfts.RequestOpts) {
     return oazapfts.ok(oazapfts.fetchJson<{
         status: 200;
         data: Post[];
+    } | {
+        status: 500;
+        data: Error;
     }>("/posts/liked", {
+        ...opts
+    }));
+}
+/**
+ * Get the file asset by the given ID. Note that assets are not separated by type; the user must assume the type from the context that the asset ID is from.
+ */
+export function getAsset(id: string, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.ok(oazapfts.fetchJson<{
+        status: 200;
+        data: Blob;
+    } | {
+        status: 404;
+        data: FormError;
+    } | {
+        status: 500;
+        data: Error;
+    }>(`/assets/${id}`, {
         ...opts
     }));
 }

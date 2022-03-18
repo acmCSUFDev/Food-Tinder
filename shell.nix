@@ -11,9 +11,9 @@ let goapi-gen = pkgs.buildGoModule {
 		# 	sha256 = "0gsy02gxqm9f2lbr8jzlvbhksqg0v5xi288462c3a3j8aics5nm2";
 		# };
 		src = pkgs.fetchgit {
-			url    = "https://git.sr.ht/~diamondburned/goapi-gen";
-			rev    = "be79ddfa8242af14b70feceff87e52ab3c3bcc81";
-			sha256 = "0kcr1rfgdhlsgbjdw23v1zx13w2gcd2zvmgfamwgk9z1p6if4y4c";
+			url    = "https://github.com/diamondburned/goapi-gen";
+			rev    = "49e462fafc1d82572218bdec3917d50c98ebed2e";
+			sha256 = "0jgvjf51bzfm620gy6r9fxnyq9yi54vvif8jzfrrn4rj13zqvhc3";
 		};
 
 		vendorSha256 = "1aq24cx5qirgzjcahzqjkzc50687xj2vqz623f56q5j5m2x8cj73";
@@ -34,11 +34,27 @@ let goapi-gen = pkgs.buildGoModule {
 		vendorSha256 = "1qr8nymhcwmqj3b8f50fknl2rbnrnvfl0yj5vfs0l1jd0r4rz2d0";
 	};
 
+	moq = pkgs.buildGoModule {
+		name = "moq";
+		version = "0.2.6";
+
+		src = pkgs.fetchFromGitHub {
+			owner  = "matryer";
+			repo   = "moq";
+			rev    = "5d3d962614e152b11aa8080d6de7b12445bf09a1";
+			sha256 = "0zsr466iaxzb24kjq82g00765hhw0lgikdva2nkxhrrgijczp8hk";
+		};
+
+		vendorSha256 = "02kb11pjcrjjsqaafj07fmvzzk03mmy74kmh004rd3ddkkdbjdsx";
+		subPackages = [ "." ];
+	};
+
 in pkgs.mkShell {
 	buildInputs = with pkgs; [
 		go_1_17
 		goapi-gen
 		sqlc
+		moq
 
 		nodejs
 	];

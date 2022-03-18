@@ -1,4 +1,4 @@
-package openapi
+package oapi
 
 import (
 	"encoding/json"
@@ -25,4 +25,9 @@ func (id *ID) UnmarshalJSON(b []byte) error {
 	}
 	*id = ID(s)
 	return nil
+}
+
+// RespErr returns an Error response value from an error.
+func RespErr(err error) Error {
+	return Error{err.Error()}
 }
