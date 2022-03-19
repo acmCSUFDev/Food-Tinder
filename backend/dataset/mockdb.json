@@ -1,0 +1,53 @@
+{
+  "Users": [
+    {
+      "Username": "food_tinder_user",
+      "DisplayName": "Food Tinder User",
+      "Avatar": "",
+      "Bio": "Hello, world!",
+      "Birthday": "2002/02/27",
+      "Password": "password",
+      "Preferences": {
+        "Likes": null,
+        "Prefers": null
+      },
+      "LikedPosts": null
+    }
+  ],
+  "Posts": [
+    {
+      "ID": "292795750931234816",
+      "Username": "food_tinder_user",
+      "Images": [],
+      "Description": "some kind of tuna mayo onigiri",
+      "Tags": [
+        "Rice",
+        "Tuna",
+        "Mayonnaise"
+      ],
+      "Location": "Fullerton, CA"
+    },
+    {
+      "ID": "292795750931234816",
+      "Username": "food_tinder_user",
+      "Images": [],
+      "Description": "some pizza dish from Pieology",
+      "Tags": [
+        "Pizza",
+        "Pepperoni"
+      ],
+      "Location": "Pieology, Fullerton, CA"
+    }
+  ],
+  "Sessions": [
+    {
+      "Username": "food_tinder_user",
+      "Token": "test",
+      "Expiry": "2999-01-01T00:00:00Z",
+      "Metadata": {
+        "UserAgent": "curl/7.80.0"
+      }
+    }
+  ],
+  "Assets": null
+}
