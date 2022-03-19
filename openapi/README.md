@@ -331,6 +331,51 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
+## uploadAsset
+
+<a id="opIduploadAsset"></a>
+
+`POST /assets`
+
+*Upload any asset. Maximum filesize is 1MB.*
+
+<h3 id="uploadasset-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|content|formData|undefined|true|The content of the file.|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "id": "string"
+}
+```
+
+<h3 id="uploadasset-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|File uploaded successfully|Inline|
+|413|[Payload Too Large](https://tools.ietf.org/html/rfc7231#section-6.5.11)|File too big.|[Error](#schemaerror)|
+|500|[Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1)|Unexpected server error.|[Error](#schemaerror)|
+
+<h3 id="uploadasset-responseschema">Response Schema</h3>
+
+Status Code **200**
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» id|string|false|none|none|
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+BearerAuth
+</aside>
+
 ## getAsset
 
 <a id="opIdgetAsset"></a>

@@ -8,7 +8,7 @@ import (
 	"github.com/bwmarrin/snowflake"
 )
 
-//go:generate goapi-gen --config=config.json ../../../../openapi/foodtinder.json
+//go:generate goapi-gen --config=config.json ../../../../openapi/foodtinder.jsonc
 
 func (id ID) MarshalJSON() ([]byte, error) {
 	return json.Marshal(string(foodtinder.ID(id).String()))

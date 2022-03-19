@@ -367,9 +367,7 @@
         "example": {
           "message": "server blew up"
         },
-        "required": [
-          "message"
-        ],
+        "required": ["message"],
         "properties": {
           "message": {
             "type": "string"
@@ -412,12 +410,7 @@
         }
       },
       "Session": {
-        "required": [
-          "user_id",
-          "token",
-          "expiry",
-          "metadata"
-        ],
+        "required": ["user_id", "token", "expiry", "metadata"],
         "properties": {
           "user_id": {
             "$ref": "#/components/schemas/ID"
@@ -444,9 +437,7 @@
             "$ref": "#/components/schemas/FoodPreferences"
           },
           {
-            "required": [
-              "birthday"
-            ],
+            "required": ["birthday"],
             "properties": {
               "birthday": {
                 "type": "string",
@@ -457,11 +448,7 @@
         ]
       },
       "User": {
-        "required": [
-          "id",
-          "name",
-          "avatar"
-        ],
+        "required": ["id", "name", "avatar"],
         "properties": {
           "id": {
             "$ref": "#/components/schemas/ID"
@@ -481,20 +468,14 @@
         }
       },
       "FoodPreferences": {
-        "required": [
-          "likes",
-          "prefers"
-        ],
+        "required": ["likes", "prefers"],
         "properties": {
           "likes": {
             "type": "array",
             "items": {
               "type": "string"
             },
-            "example": [
-              "Rice",
-              "Fish"
-            ]
+            "example": ["Rice", "Fish"]
           },
           "prefers": {
             "type": "object",
@@ -505,23 +486,14 @@
               }
             },
             "example": {
-              "Rice": [
-                "Sushi Rice"
-              ],
-              "Fish": [
-                "Ahi Tuna",
-                "Salmon"
-              ]
+              "Rice": ["Sushi Rice"],
+              "Fish": ["Ahi Tuna", "Salmon"]
             }
           }
         }
       },
       "UserLikedPosts": {
-        "required": [
-          "posts",
-          "remaining",
-          "expires"
-        ],
+        "required": ["posts", "remaining", "expires"],
         "properties": {
           "posts": {
             "type": "object",
@@ -548,13 +520,7 @@
         }
       },
       "Post": {
-        "required": [
-          "id",
-          "user_id",
-          "images",
-          "description",
-          "tags"
-        ],
+        "required": ["id", "user_id", "images", "description", "tags"],
         "properties": {
           "id": {
             "$ref": "#/components/schemas/ID"
@@ -571,9 +537,7 @@
             "items": {
               "type": "string"
             },
-            "example": [
-              "ypeBEsobvcr6wjGzmiPcTaeG7_gUfE5yuYB3ha_uSLs="
-            ]
+            "example": ["ypeBEsobvcr6wjGzmiPcTaeG7_gUfE5yuYB3ha_uSLs="]
           },
           "description": {
             "type": "string",
@@ -584,10 +548,7 @@
             "items": {
               "type": "string"
             },
-            "example": [
-              "Salmon",
-              "Sushi Rice"
-            ]
+            "example": ["Salmon", "Sushi Rice"]
           },
           "location": {
             "type": "string",
