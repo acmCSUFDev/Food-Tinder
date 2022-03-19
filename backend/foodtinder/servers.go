@@ -2,6 +2,7 @@ package foodtinder
 
 import (
 	"context"
+	"io"
 	"io/fs"
 )
 
@@ -31,15 +32,12 @@ type AuthorizerServer interface {
 
 // AuthorizedServer describes a service for a specific user session.
 type AuthorizedServer interface {
-	// Self returns the currently authorized user.
-	Self(context.Context) (*Self, error)
-	// Session returns the session information.
-	Session(context.Context) (*Session, error)
 	// Logout invalidates the authorizing token.
 	Logout(context.Context) error
 
 	PostServer() PostServer
 	UserServer() UserServer
+	AssetUploadServer() AssetUploadServer
 }
 
 // PostServer is a service serving Posts.
@@ -48,17 +46,40 @@ type PostServer interface {
 	// starting from the given previous ID. If the ID is 0, then the top is
 	// assumed.
 	NextPosts(ctx context.Context, previousID ID) ([]Post, error)
+	// LikedPosts returns the list of liked posts by the user.
 	LikedPosts(ctx context.Context) ([]Post, error)
 	// DeletePosts deletes the given posts. Only the posts that belong to the
 	// current user can be deleted.
 	DeletePost(ctx context.Context, id ID) error
+	// CreatePost creates a new post. The post's ID is ignored and a new one is
+	// used. That ID is returned back.
+	CreatePost(ctx context.Context, post Post) (ID, error)
 }
 
 // UserServer describes a service serving Users.
 type UserServer interface {
 	// User fetches the user given the ID. Use this to fetch other users.
-	User(ctx context.Context, id ID) (*User, error)
-	// FoodPreferences fetches the food preferences of the user with the given
-	// ID.
+	User(ctx context.Context, username string) (*User, error)
+	// Self returns the current user.
+	Self(context.Context) (*Self, error)
+	// FoodPreferences fetches the food preferences of the current user.
 	FoodPreferences(ctx context.Context) (*FoodPreferences, error)
+	// SetFoodPreferences overrieds the food preferences of the current user.
+	SetFoodPreferences(ctx context.Context, prefs *FoodPreferences) error
+	// TODO: UpdateSelf().
+}
+
+// MaxAssetSize is the maximum size in bytes that an asset should be.
+const MaxAssetSize = 1 << 20 // 1MB
+
+// AssetUploadServer describes a service for creating files.
+//
+// TODO: consider if we should keep track of which user uploaded which asset.
+// Otherwise, we can smartly reference-count them.
+type AssetUploadServer interface {
+	// Upload creates a file with the content from the given Reader. The new
+	// asset hash is returned, or an error if there's one. Create may be called
+	// concurrently; the implementation should guarantee that everything is
+	// atomic and that there is no collision.
+	Upload(r io.Reader) (string, error)
 }

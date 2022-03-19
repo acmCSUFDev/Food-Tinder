@@ -4,17 +4,22 @@ let goapi-gen = pkgs.buildGoModule {
 		name = "goapi-gen";
 		version = "081d60b";
 
-		# src = pkgs.fetchFromGitHub {
-		# 	owner  = "discord-gophers";
-		# 	repo   = "goapi-gen";
-		# 	rev    = "081d60b";
-		# 	sha256 = "0gsy02gxqm9f2lbr8jzlvbhksqg0v5xi288462c3a3j8aics5nm2";
-		# };
-		src = pkgs.fetchgit {
-			url    = "https://github.com/diamondburned/goapi-gen";
-			rev    = "49e462fafc1d82572218bdec3917d50c98ebed2e";
-			sha256 = "0jgvjf51bzfm620gy6r9fxnyq9yi54vvif8jzfrrn4rj13zqvhc3";
+		src = pkgs.fetchFromGitHub {
+			owner  = "discord-gophers";
+			repo   = "goapi-gen";
+			rev    = "4be5ffd30c4c1fb32bfaeff8ab8923a95a91120f";
+			sha256 = "0kcr1rfgdhlsgbjdw23v1zx13w2gcd2zvmgfamwgk9z1p6if4y4c";
 		};
+		# src = pkgs.fetchgit {
+		# 	url    = "https://github.com/diamondburned/goapi-gen";
+		# 	rev    = "49e462fafc1d82572218bdec3917d50c98ebed2e";
+		# 	sha256 = "0jgvjf51bzfm620gy6r9fxnyq9yi54vvif8jzfrrn4rj13zqvhc3";
+		# };
+
+		patches = let patch = c: "https://github.com/diamondburned/goapi-gen/commit/${c}.patch"; in [
+			(builtins.fetchurl (patch "21e6938b8dc9732b71f9f31dceddeb0697fff6c3")) # PR #82
+			(builtins.fetchurl (patch "49e462fafc1d82572218bdec3917d50c98ebed2e")) # PR #80
+		];
 
 		vendorSha256 = "1aq24cx5qirgzjcahzqjkzc50687xj2vqz623f56q5j5m2x8cj73";
 	};

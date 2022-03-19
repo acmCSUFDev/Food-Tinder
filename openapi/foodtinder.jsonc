@@ -6,14 +6,8 @@
   },
   "servers": [
     {
-      "url": "https://{hostname}/api/v0",
-      "description": "Version 0 API path.",
-      "variables": {
-        "hostname": {
-          "default": "localhost",
-          "description": "The domain of the API backend server"
-        }
-      }
+      "url": "/api/v0",
+      "description": "Version 0 API path."
     }
   ],
   "security": [
@@ -53,9 +47,7 @@
             "description": "Logged in successfully.",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Session"
-                }
+                "schema": { "$ref": "#/components/schemas/Session" }
               }
             }
           },
@@ -63,15 +55,11 @@
             "description": "401 Unauthorized returned when the user enters the wrong username and password combination.",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
+                "schema": { "$ref": "#/components/schemas/Error" }
               }
             }
           },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
+          "500": { "$ref": "#/components/responses/ServerError" }
         }
       }
     },
@@ -106,22 +94,16 @@
             "description": "Registered successfully.",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Session"
-                }
+                "schema": { "$ref": "#/components/schemas/Session" }
               }
             }
           },
-          "400": {
-            "$ref": "#/components/responses/FormError"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
+          "400": { "$ref": "#/components/responses/FormError" },
+          "500": { "$ref": "#/components/responses/ServerError" }
         }
       }
     },
-    "/users/self": {
+    "/users/@self": {
       "get": {
         "summary": "Get the current user",
         "operationId": "getSelf",
@@ -129,40 +111,27 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Self"
-                }
+                "schema": { "$ref": "#/components/schemas/Self" }
               }
             }
           },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
+          "500": { "$ref": "#/components/responses/ServerError" }
         }
       }
     },
-    "/users/{id}": {
+    "/users/{username}": {
       "get": {
-        "summary": "Get a user by their ID",
+        "summary": "Get a user by their username",
         "operationId": "getUser",
         "parameters": [
           {
-            "name": "id",
+            "name": "username",
             "in": "path",
-            "description": "The ID of the user.",
+            "description": "The username of the user.",
             "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/ID"
-            }
-          },
-          {
-            "name": "password",
-            "in": "query",
-            "required": true,
-            "style": "form",
             "schema": {
               "type": "string",
-              "format": "password"
+              "example": "food_tinder_user"
             }
           }
         ],
@@ -170,21 +139,13 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                }
+                "schema": { "$ref": "#/components/schemas/User" }
               }
             }
           },
-          "400": {
-            "$ref": "#/components/responses/FormError"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
+          "400": { "$ref": "#/components/responses/FormError" },
+          "404": { "$ref": "#/components/responses/NotFoundError" },
+          "500": { "$ref": "#/components/responses/ServerError" }
         }
       }
     },
@@ -198,9 +159,7 @@
             "in": "query",
             "description": "The ID to start the pagination from, or empty to start from top.",
             "required": false,
-            "schema": {
-              "$ref": "#/components/schemas/ID"
-            }
+            "schema": { "$ref": "#/components/schemas/ID" }
           }
         ],
         "responses": {
@@ -209,19 +168,37 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Post"
-                  }
+                  "items": { "$ref": "#/components/schemas/Post" }
                 }
               }
             }
           },
-          "400": {
-            "$ref": "#/components/responses/FormError"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
+          "400": { "$ref": "#/components/responses/FormError" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      },
+      "post": {
+        "summary": "Create a new post",
+        "description": "Create a new post and return the newly created post with an ID.",
+        "operationId": "createPost",
+        "requestBody": {
+          "description": "The data of the new post.",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Post" }
+            }
           }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Post" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/UserError" },
+          "500": { "$ref": "#/components/responses/ServerError" }
         }
       }
     },
@@ -235,21 +212,15 @@
             "in": "path",
             "description": "The post ID to delete.",
             "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/ID"
-            }
+            "schema": { "$ref": "#/components/schemas/ID" }
           }
         ],
         "responses": {
           "200": {
             "description": "All posts successfully deleted."
           },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
+          "404": { "$ref": "#/components/responses/NotFoundError" },
+          "500": { "$ref": "#/components/responses/ServerError" }
         }
       }
     },
@@ -263,16 +234,51 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Post"
-                  }
+                  "items": { "$ref": "#/components/schemas/Post" }
                 }
               }
             }
           },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/assets": {
+      "post": {
+        "summary": "Upload an asset",
+        "description": "Upload any file as an asset and get back the asset hash/ID.",
+        "operationId": "uploadAsset",
+        "requestBody": {
+          "description": "The data of the asset.",
+          "content": {
+            "*/*": {
+              "type": "string",
+              "format": "binary"
+            }
           }
+        },
+        "responses": {
+          "200": {
+            "description": "Asset uploaded successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "description": "The new asset hash/ID that identifies this asset."
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Asset file was too big. It should be 1MB or less.",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/UserError" },
+          "500": { "$ref": "#/components/responses/ServerError" }
         }
       }
     },
@@ -280,6 +286,7 @@
       "get": {
         "summary": "Get the file asset by the given ID. Note that assets are not separated by type; the user must assume the type from the context that the asset ID is from.",
         "operationId": "getAsset",
+        "security": [],
         "parameters": [
           {
             "name": "id",
@@ -302,12 +309,8 @@
               }
             }
           },
-          "404": {
-            "$ref": "#/components/responses/NotFoundError"
-          },
-          "500": {
-            "$ref": "#/components/responses/ServerError"
-          }
+          "404": { "$ref": "#/components/responses/NotFoundError" },
+          "500": { "$ref": "#/components/responses/ServerError" }
         }
       }
     }
@@ -324,9 +327,7 @@
         "description": "Resource indicated by a parameter (if any) isn't found.",
         "content": {
           "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/FormError"
-            }
+            "schema": { "$ref": "#/components/schemas/FormError" }
           }
         }
       },
@@ -334,9 +335,7 @@
         "description": "User error.",
         "content": {
           "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/Error"
-            }
+            "schema": { "$ref": "#/components/schemas/Error" }
           }
         }
       },
@@ -344,9 +343,7 @@
         "description": "Form error.",
         "content": {
           "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/FormError"
-            }
+            "schema": { "$ref": "#/components/schemas/FormError" }
           }
         }
       },
@@ -354,9 +351,7 @@
         "description": "Unexpected server error.",
         "content": {
           "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/Error"
-            }
+            "schema": { "$ref": "#/components/schemas/Error" }
           }
         }
       }
@@ -381,13 +376,12 @@
           "form_id": "username"
         },
         "allOf": [
-          {
-            "$ref": "#/components/schemas/Error"
-          },
+          { "$ref": "#/components/schemas/Error" },
           {
             "properties": {
               "form_id": {
-                "type": "string"
+                "type": "string",
+                "x-go-optional-value": true
               }
             }
           }
@@ -405,15 +399,17 @@
           "user_agent": {
             "description": "The User-Agent used for logging in.",
             "example": "curl/7.64.1",
-            "type": "string"
+            "type": "string",
+            "x-go-optional-value": true
           }
         }
       },
       "Session": {
-        "required": ["user_id", "token", "expiry", "metadata"],
+        "required": ["username", "token", "expiry", "metadata"],
         "properties": {
-          "user_id": {
-            "$ref": "#/components/schemas/ID"
+          "username": {
+            "type": "string",
+            "example": "food_tinder_user"
           },
           "token": {
             "type": "string",
@@ -423,21 +419,14 @@
             "type": "string",
             "format": "date-time"
           },
-          "metadata": {
-            "$ref": "#/components/schemas/LoginMetadata"
-          }
+          "metadata": { "$ref": "#/components/schemas/LoginMetadata" }
         }
       },
       "Self": {
         "allOf": [
+          { "$ref": "#/components/schemas/User" },
+          { "$ref": "#/components/schemas/FoodPreferences" },
           {
-            "$ref": "#/components/schemas/User"
-          },
-          {
-            "$ref": "#/components/schemas/FoodPreferences"
-          },
-          {
-            "required": ["birthday"],
             "properties": {
               "birthday": {
                 "type": "string",
@@ -448,14 +437,16 @@
         ]
       },
       "User": {
-        "required": ["id", "name", "avatar"],
+        "required": ["username", "avatar"],
+        "x-go-optional-value": true,
         "properties": {
-          "id": {
-            "$ref": "#/components/schemas/ID"
-          },
-          "name": {
+          "username": {
             "type": "string",
             "example": "food-tinder-user"
+          },
+          "display_name": {
+            "type": "string",
+            "example": "Food Tinder User"
           },
           "avatar": {
             "type": "string",
@@ -520,13 +511,15 @@
         }
       },
       "Post": {
-        "required": ["id", "user_id", "images", "description", "tags"],
+        "required": ["id", "username", "images", "description", "tags"],
+        "x-go-optional-value": true,
         "properties": {
           "id": {
             "$ref": "#/components/schemas/ID"
           },
-          "user_id": {
-            "$ref": "#/components/schemas/ID"
+          "username": {
+            "type": "string",
+            "example": "food_tinder_user"
           },
           "cover_hash": {
             "type": "string",

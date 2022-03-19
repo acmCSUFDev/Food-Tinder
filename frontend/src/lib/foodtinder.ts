@@ -7,20 +7,17 @@
 import * as Oazapfts from "oazapfts/lib/runtime";
 import * as QS from "oazapfts/lib/runtime/query";
 export const defaults: Oazapfts.RequestOpts = {
-    baseUrl: "https://localhost/api/v0",
+    baseUrl: "/api/v0",
 };
 const oazapfts = Oazapfts.runtime(defaults);
 export const servers = {
-    version0ApiPath: ({ hostname = "localhost" }: {
-        hostname: string | number | boolean;
-    }) => `https://${hostname}/api/v0`
+    version0ApiPath: "/api/v0"
 };
-export type Id = string;
 export type LoginMetadata = {
     user_agent?: string;
 };
 export type Session = {
-    user_id: Id;
+    username: string;
     token: string;
     expiry: string;
     metadata: LoginMetadata;
@@ -32,8 +29,8 @@ export type FormError = Error & {
     form_id?: string;
 };
 export type User = {
-    id: Id;
-    name: string;
+    username: string;
+    display_name?: string;
     avatar: string;
     bio?: string;
 };
@@ -44,11 +41,12 @@ export type FoodPreferences = {
     };
 };
 export type Self = User & FoodPreferences & {
-    birthday: string;
+    birthday?: string;
 };
+export type Id = string;
 export type Post = {
     id: Id;
-    user_id: Id;
+    username: string;
     cover_hash?: string;
     images: string[];
     description: string;
@@ -107,14 +105,14 @@ export function getSelf(opts?: Oazapfts.RequestOpts) {
     } | {
         status: 500;
         data: Error;
-    }>("/users/self", {
+    }>("/users/@self", {
         ...opts
     }));
 }
 /**
- * Get a user by their ID
+ * Get a user by their username
  */
-export function getUser(id: Id, password: string, opts?: Oazapfts.RequestOpts) {
+export function getUser(username: string, opts?: Oazapfts.RequestOpts) {
     return oazapfts.ok(oazapfts.fetchJson<{
         status: 200;
         data: User;
@@ -127,9 +125,7 @@ export function getUser(id: Id, password: string, opts?: Oazapfts.RequestOpts) {
     } | {
         status: 500;
         data: Error;
-    }>(`/users/${id}${QS.query(QS.form({
-        password
-    }))}`, {
+    }>(`/users/${username}`, {
         ...opts
     }));
 }
@@ -153,6 +149,25 @@ export function getNextPosts({ prevId }: {
     }))}`, {
         ...opts
     }));
+}
+/**
+ * Create a new post
+ */
+export function createPost(post?: Post, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.ok(oazapfts.fetchJson<{
+        status: 200;
+        data: Post;
+    } | {
+        status: 400;
+        data: Error;
+    } | {
+        status: 500;
+        data: Error;
+    }>("/posts", oazapfts.json({
+        ...opts,
+        method: "POST",
+        body: post
+    })));
 }
 /**
  * Delete the current user's posts by ID. A 401 is returned if the user tries to delete someone else's post.
@@ -184,6 +199,28 @@ export function getLikedPosts(opts?: Oazapfts.RequestOpts) {
     }>("/posts/liked", {
         ...opts
     }));
+}
+/**
+ * Upload an asset
+ */
+export function uploadAsset(body?: Blob, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.ok(oazapfts.fetchJson<{
+        status: 200;
+        data: string;
+    } | {
+        status: 400;
+        data: Error;
+    } | {
+        status: 413;
+        data: Error;
+    } | {
+        status: 500;
+        data: Error;
+    }>("/assets", oazapfts.json({
+        ...opts,
+        method: "POST",
+        body
+    })));
 }
 /**
  * Get the file asset by the given ID. Note that assets are not separated by type; the user must assume the type from the context that the asset ID is from.

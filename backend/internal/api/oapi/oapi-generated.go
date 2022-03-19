@@ -50,7 +50,7 @@ type FormError struct {
 	// Embedded struct due to allOf(#/components/schemas/Error)
 	Error `yaml:",inline"`
 	// Embedded fields due to inline allOf schema
-	FormID *string `json:"form_id,omitempty"`
+	FormID string `json:"form_id,omitempty"`
 }
 
 // Snowflake ID.
@@ -59,24 +59,22 @@ type ID foodtinder.ID
 // Optional metadata included on login.
 type LoginMetadata struct {
 	// The User-Agent used for logging in.
-	UserAgent *string `json:"user_agent,omitempty"`
+	UserAgent string `json:"user_agent,omitempty"`
 }
 
 // Post defines model for Post.
 type Post struct {
-	CoverHash   *string `json:"cover_hash,omitempty"`
-	Description string  `json:"description"`
+	CoverHash   string `json:"cover_hash,omitempty"`
+	Description string `json:"description"`
 
 	// Snowflake ID.
 	ID     ID       `json:"id"`
 	Images []string `json:"images"`
 
 	// Location is the location where the post was made.
-	Location *string  `json:"location,omitempty"`
+	Location string   `json:"location,omitempty"`
 	Tags     []string `json:"tags"`
-
-	// Snowflake ID.
-	UserID ID `json:"user_id"`
+	Username string   `json:"username"`
 }
 
 // Self defines model for Self.
@@ -86,7 +84,7 @@ type Self struct {
 	// Embedded struct due to allOf(#/components/schemas/FoodPreferences)
 	FoodPreferences `yaml:",inline"`
 	// Embedded fields due to inline allOf schema
-	Birthday openapi_types.Date `json:"birthday"`
+	Birthday *openapi_types.Date `json:"birthday,omitempty"`
 }
 
 // Session defines model for Session.
@@ -96,19 +94,15 @@ type Session struct {
 	// Optional metadata included on login.
 	Metadata LoginMetadata `json:"metadata"`
 	Token    string        `json:"token"`
-
-	// Snowflake ID.
-	UserID ID `json:"user_id"`
+	Username string        `json:"username"`
 }
 
 // User defines model for User.
 type User struct {
-	Avatar string  `json:"avatar"`
-	Bio    *string `json:"bio,omitempty"`
-
-	// Snowflake ID.
-	ID   ID     `json:"id"`
-	Name string `json:"name"`
+	Avatar      string `json:"avatar"`
+	Bio         string `json:"bio,omitempty"`
+	DisplayName string `json:"display_name,omitempty"`
+	Username    string `json:"username"`
 }
 
 // Error object returned on a form error.
@@ -116,6 +110,9 @@ type NotFoundError FormError
 
 // Error object returned on any error.
 type ServerError Error
+
+// Error object returned on any error.
+type UserError Error
 
 // LoginParams defines parameters for Login.
 type LoginParams struct {
@@ -129,15 +126,21 @@ type GetNextPostsParams struct {
 	PrevID *ID `json:"prev_id,omitempty"`
 }
 
+// CreatePostJSONBody defines parameters for CreatePost.
+type CreatePostJSONBody Post
+
 // RegisterParams defines parameters for Register.
 type RegisterParams struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
-// GetUserParams defines parameters for GetUser.
-type GetUserParams struct {
-	Password string `json:"password"`
+// CreatePostJSONRequestBody defines body for CreatePost for application/json ContentType.
+type CreatePostJSONRequestBody CreatePostJSONBody
+
+// Bind implements render.Binder.
+func (CreatePostJSONRequestBody) Bind(*http.Request) error {
+	return nil
 }
 
 // Response is a common response struct for all the API calls.
@@ -178,6 +181,46 @@ func (resp *Response) MarshalJSON() ([]byte, error) {
 // This is used to only marshal the body of the response.
 func (resp *Response) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	return e.Encode(resp.body)
+}
+
+// UploadAssetJSON200Response is a constructor method for a UploadAsset response.
+// A *Response is returned with the configured status code and content type from the spec.
+func UploadAssetJSON200Response(body string) *Response {
+	return &Response{
+		body:        body,
+		statusCode:  200,
+		contentType: "application/json",
+	}
+}
+
+// UploadAssetJSON400Response is a constructor method for a UploadAsset response.
+// A *Response is returned with the configured status code and content type from the spec.
+func UploadAssetJSON400Response(body Error) *Response {
+	return &Response{
+		body:        body,
+		statusCode:  400,
+		contentType: "application/json",
+	}
+}
+
+// UploadAssetJSON413Response is a constructor method for a UploadAsset response.
+// A *Response is returned with the configured status code and content type from the spec.
+func UploadAssetJSON413Response(body Error) *Response {
+	return &Response{
+		body:        body,
+		statusCode:  413,
+		contentType: "application/json",
+	}
+}
+
+// UploadAssetJSON500Response is a constructor method for a UploadAsset response.
+// A *Response is returned with the configured status code and content type from the spec.
+func UploadAssetJSON500Response(body Error) *Response {
+	return &Response{
+		body:        body,
+		statusCode:  500,
+		contentType: "application/json",
+	}
 }
 
 // GetAssetJSON404Response is a constructor method for a GetAsset response.
@@ -253,6 +296,36 @@ func GetNextPostsJSON400Response(body FormError) *Response {
 // GetNextPostsJSON500Response is a constructor method for a GetNextPosts response.
 // A *Response is returned with the configured status code and content type from the spec.
 func GetNextPostsJSON500Response(body Error) *Response {
+	return &Response{
+		body:        body,
+		statusCode:  500,
+		contentType: "application/json",
+	}
+}
+
+// CreatePostJSON200Response is a constructor method for a CreatePost response.
+// A *Response is returned with the configured status code and content type from the spec.
+func CreatePostJSON200Response(body Post) *Response {
+	return &Response{
+		body:        body,
+		statusCode:  200,
+		contentType: "application/json",
+	}
+}
+
+// CreatePostJSON400Response is a constructor method for a CreatePost response.
+// A *Response is returned with the configured status code and content type from the spec.
+func CreatePostJSON400Response(body Error) *Response {
+	return &Response{
+		body:        body,
+		statusCode:  400,
+		contentType: "application/json",
+	}
+}
+
+// CreatePostJSON500Response is a constructor method for a CreatePost response.
+// A *Response is returned with the configured status code and content type from the spec.
+func CreatePostJSON500Response(body Error) *Response {
 	return &Response{
 		body:        body,
 		statusCode:  500,
@@ -445,6 +518,9 @@ func (a FoodPreferences_Prefers) MarshalJSON() ([]byte, error) {
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// Upload an asset
+	// (POST /assets)
+	UploadAsset(w http.ResponseWriter, r *http.Request) *Response
 	// Get the file asset by the given ID. Note that assets are not separated by type; the user must assume the type from the context that the asset ID is from.
 	// (GET /assets/{id})
 	GetAsset(w http.ResponseWriter, r *http.Request, id string) *Response
@@ -454,6 +530,9 @@ type ServerInterface interface {
 	// Get the next batch of posts
 	// (GET /posts)
 	GetNextPosts(w http.ResponseWriter, r *http.Request, params GetNextPostsParams) *Response
+	// Create a new post
+	// (POST /posts)
+	CreatePost(w http.ResponseWriter, r *http.Request) *Response
 	// Get the list of posts liked by the user
 	// (GET /posts/liked)
 	GetLikedPosts(w http.ResponseWriter, r *http.Request) *Response
@@ -464,11 +543,11 @@ type ServerInterface interface {
 	// (POST /register)
 	Register(w http.ResponseWriter, r *http.Request, params RegisterParams) *Response
 	// Get the current user
-	// (GET /users/self)
+	// (GET /users/@self)
 	GetSelf(w http.ResponseWriter, r *http.Request) *Response
-	// Get a user by their ID
-	// (GET /users/{id})
-	GetUser(w http.ResponseWriter, r *http.Request, id ID, params GetUserParams) *Response
+	// Get a user by their username
+	// (GET /users/{username})
+	GetUser(w http.ResponseWriter, r *http.Request, username string) *Response
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -476,6 +555,22 @@ type ServerInterfaceWrapper struct {
 	Handler          ServerInterface
 	Middlewares      map[string]func(http.Handler) http.Handler
 	ErrorHandlerFunc func(w http.ResponseWriter, r *http.Request, err error)
+}
+
+// UploadAsset operation middleware
+func (siw *ServerInterfaceWrapper) UploadAsset(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{""})
+
+	var handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resp := siw.Handler.UploadAsset(w, r)
+		if resp != nil {
+			render.Render(w, r, resp)
+		}
+	})
+
+	handler(w, r.WithContext(ctx))
 }
 
 // GetAsset operation middleware
@@ -490,8 +585,6 @@ func (siw *ServerInterfaceWrapper) GetAsset(w http.ResponseWriter, r *http.Reque
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{err, "id"})
 		return
 	}
-
-	ctx = context.WithValue(ctx, BearerAuthScopes, []string{""})
 
 	var handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		resp := siw.Handler.GetAsset(w, r, id)
@@ -555,6 +648,22 @@ func (siw *ServerInterfaceWrapper) GetNextPosts(w http.ResponseWriter, r *http.R
 
 	var handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		resp := siw.Handler.GetNextPosts(w, r, params)
+		if resp != nil {
+			render.Render(w, r, resp)
+		}
+	})
+
+	handler(w, r.WithContext(ctx))
+}
+
+// CreatePost operation middleware
+func (siw *ServerInterfaceWrapper) CreatePost(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{""})
+
+	var handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resp := siw.Handler.CreatePost(w, r)
 		if resp != nil {
 			render.Render(w, r, resp)
 		}
@@ -657,30 +766,19 @@ func (siw *ServerInterfaceWrapper) GetSelf(w http.ResponseWriter, r *http.Reques
 func (siw *ServerInterfaceWrapper) GetUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	// ------------- Path parameter "id" -------------
-	var id ID
+	// ------------- Path parameter "username" -------------
+	var username string
 
-	if err := runtime.BindStyledParameter("simple", false, "id", chi.URLParam(r, "id"), &id); err != nil {
-		err = fmt.Errorf("invalid format for parameter id: %w", err)
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{err, "id"})
+	if err := runtime.BindStyledParameter("simple", false, "username", chi.URLParam(r, "username"), &username); err != nil {
+		err = fmt.Errorf("invalid format for parameter username: %w", err)
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{err, "username"})
 		return
 	}
 
 	ctx = context.WithValue(ctx, BearerAuthScopes, []string{""})
 
-	// Parameter object where we will unmarshal all parameters from the context
-	var params GetUserParams
-
-	// ------------- Required query parameter "password" -------------
-
-	if err := runtime.BindQueryParameter("form", true, true, "password", r.URL.Query(), &params.Password); err != nil {
-		err = fmt.Errorf("invalid format for parameter password: %w", err)
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{err, "password"})
-		return
-	}
-
 	var handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		resp := siw.Handler.GetUser(w, r, id, params)
+		resp := siw.Handler.GetUser(w, r, username)
 		if resp != nil {
 			render.Render(w, r, resp)
 		}
@@ -764,14 +862,16 @@ func Handler(si ServerInterface, opts ...ServerOption) http.Handler {
 	}
 
 	r.Route(options.BaseURL, func(r chi.Router) {
+		r.Post("/assets", wrapper.UploadAsset)
 		r.Get("/assets/{id}", wrapper.GetAsset)
 		r.Post("/login", wrapper.Login)
 		r.Get("/posts", wrapper.GetNextPosts)
+		r.Post("/posts", wrapper.CreatePost)
 		r.Get("/posts/liked", wrapper.GetLikedPosts)
 		r.Delete("/posts/{id}", wrapper.DeletePost)
 		r.Post("/register", wrapper.Register)
-		r.Get("/users/self", wrapper.GetSelf)
-		r.Get("/users/{id}", wrapper.GetUser)
+		r.Get("/users/@self", wrapper.GetSelf)
+		r.Get("/users/{username}", wrapper.GetUser)
 
 	})
 	return r
@@ -810,37 +910,41 @@ func WithErrorHandler(handler func(w http.ResponseWriter, r *http.Request, err e
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/+xZbW/bOBL+KwRvgb0rFNtJ89L14T6km6abQ7Y18tLdQ9YIaGlksaFILUnZUQP/98OQ",
-	"kiVZjutm0xY43DdLoub1mWdm5AcaqjRTEqQ1dPhANZhMSQPu4lTp9I3WSuNFqKQFafEnyzLBQ2a5kv2P",
-	"Rkm8Z8IEUoa/ftAQ0yH9W7+W3PdPTb+WuFgsAhqBCTXPUBAdOnUE8GmPLgL6TtlTlcvoG1pwAUblOgTC",
-	"ZYTiISKTgjCSMc1SsKDJ33lMmCz+QbiRP1oSo4HO2kvQM9DPa+ujdl5LuM8gRPuM07sM2yIoZbsELs1p",
-	"v+5uEzX5CKElGmyuJURESfSskhRQuGdpJgBfT8EYNgU6pKW6iYA5yTN0PNMqA225h8zy5AO1RebesJrL",
-	"qbNMw5851xDR4c3y4HgR0FOlopGGGDTI0MtpSxX8zv9Y2nRDL3gINKCn3CR0HFBuITVr1AbVDaY1K7zB",
-	"qMmdZVHEMSZMjFr6thfWCJKzZHhDjxNOrnLJaEAvmUiVRPOctcMbepmbhBN3Na7F+VR0YuTdri32sWrU",
-	"JBPifUyHN1vBKFiNaqx0esujdblajIOtMUPiRt22IrJUQHMDWrIUE1ZjKeXGcDkly4fo/9lJF6+XUs1j",
-	"we6AnJ20VNCfDl6+Gvx0sHtwuLd7sHd0cLhHgxVnAnq/M1U75c1YqchyGYHunZ1gAs/VlMtfwbKIWdZV",
-	"/T7z+CBpeYRwGYo88r4LfLlHV4sAHbpl07L+2wKvEiDXBvTOMT5H3yMMIIqaYjC8vNrDMNeif9Q73O/t",
-	"dlxzzDBSxnYrJlQz0LcJQ0g2yoaev/nlw6H87fVecfcqK9S/WXTxond09/OvkfzYlb8CgqYgD22ilRDO",
-	"/h9e9f6Qf8iRBmsLEibAMnc/hd46uR52m1Dr08NTNu2UfpHB6zdGTWahPpx/fPsp5aPwisHbo9vpdfzm",
-	"oMj/8/plwm7zy3Pzry/jBqE8UXfzdl4+IdwQmwCpTpJ5AhrcrUwZS+bMkJRF0M7iaS4EaKtkQH4+XhcP",
-	"y6arXpbkEbQ440uccTDcLtArxMMjWr++TEIbDaXNY9f7RLw9HSH6HRttbtPtltBlrwnXNolYURENs3RI",
-	"I2ZhTZm0vVu+OV54640pU97WAPcZ1135O5ansC6HaYNFNvnWphxMnLqDlfL6TcxGv0fv8iK2VryCyw+H",
-	"R8ndxPx+sDs/v774dLVO/9PzXafamxJUvjecwlC51HXixGbMMt22/4tKdI0vE67aAn8BIVRA5kqL6C8x",
-	"ius0LdHYE3Z8U9jBSHwWQC5SZTsrnR+7yQvCXHNbXKJCH5vXwDTo49wmy7EPBU/c7VpRYm3m6ZzL2Hlu",
-	"uXXGvc9AHo/OiHfCUSrWxs6Vs5cGdAbaw5cOeoPeLrqoMpAs43RIX/YGvQH2J2YTZ0+fGQPW9B94tMDr",
-	"Kbjmgel0dHaG3fot2GM85l4sJ1/j6rrby5w8cnZCrCIx2DDB5HB8ijqrOA19zOogWp1D0BiDVwM+Dtqr",
-	"yN5gsDJWv+i/aE/SyyKdcMkcdjvdchHQ/cH+YzhZKuy3V49FQA+8+s1vNVcAB4c8TdEQF1DXIWIuqohN",
-	"Cndnymcgcawh75TFNsKsP2AI00CkssQAJqHcRdClf7o3EakkzY07n6e+BeFjEmuVuisXrXvrpdpmsrhx",
-	"p/zC0HdjjKvrcpZow8HxVRcLLsl/5uBCXWa5MedtneuAGluUhahTx/TrRGfMmLnSm2G0xEDj9GfUfR5p",
-	"T1/gqtayZoU7V9MpRIRLYvIwBGPiXIjCrZL7g92vv0LuD3bJtWS5TZTmnyCqZ/p5ArJGGEhMuLuea9WY",
-	"1gmTEanCTEKVYtmh8N7TC6bkTzq8GTfL51zhXEzy1rbQ0t8jxwQ94qb2g8fOaiRUBEU5u3EZKq0htCX2",
-	"EfJmExO+g3s7coe2YEPPg8Yy7QsuY9MyKq7eAqI0gTSzRX3MV6vKlry5insNM9+bt8u4a+9/FdTLIXOT",
-	"Jrd5dObOkmW3SH/jU8yzMaxEvpswGyZExcQnt85zHzfqaFO2z/FAle7vGsJnCojgxi5DQZz/Ve9xs04j",
-	"ONVMEIEAC93wnLj7zuQtSsFtQ74evMCnDQZPhXrboGMhygg02bY0LCpZ9zsMBj6kvlnnWpdfBPSPprR2",
-	"UrjZ4FFycxRtNQdTx5kYlYKSQEAYKCWVZKdhyo0tZ/i1vf6iOvH/dv+s7b6KK0Tr+v23IctHumtl2qb+",
-	"6uGDj0zflNv+YxTqvgZ81SiL+Hk5sll6TU8/tyRdm3WFsnYqUHW9fiUe/B+qI/+F6ImDxHdb8JhnY99c",
-	"uSYuK+26a38PuBljFP0/Kuug88Fv9mRAjkdnBNGC0Mm1KD8YmGG//5AoYzHViz7LeH+Gy/6Mac4mwuel",
-	"eu57YsxygXkWKmQi8Z28i9dIpYzLCrOofMLCO5DVv03uD4LFfwMAAP//AjuZsjscAAA=",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
