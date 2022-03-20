@@ -60,13 +60,20 @@ let goapi-gen = pkgs.buildGoModule {
 		subPackages = [ "." ];
 	};
 
+	nixos-shell = pkgs.callPackage (pkgs.fetchFromGitHub {
+		owner  = "diamondburned";
+		repo   = "nixos-shell";
+		rev    = "1c2cf850c3c4c68fa8f18850b231c5a365a500d6";
+		sha256 = "1ah05pzn1pcwr5zbqprxlva42b57na9p6m4d93zin2m2bdcrjy53";
+	}) {};
+
 in pkgs.mkShell {
 	buildInputs = with pkgs; [
 		go_1_17
 		goapi-gen
 		sqlc
 		moq
-
+		nixos-shell # for local PostgreSQL server
 		nodejs
 	];
 

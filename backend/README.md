@@ -25,12 +25,15 @@ It is recommended to develop the backend inside the supplied
 to generate the Go code in this repository.
 
 To set this up, first follow the [Install Nix](https://nixos.org/download.html)
-instructions, then run `nix-shell` inside the root directory.
+instructions, then run `nix-shell` inside the *project* root directory.
 
 To regenerate all Go files, use `go generate ./...`.
 
-To generate all Go *and* JS files, `cd` back to the last directory and run
-`./generate.sh`.
+To generate all Go *and* JS files, `cd` back to the project root directory and
+run `./generate.sh`.
+
+To run the backend with a proper PostgreSQL development instance, use `sudo
+nixos-shell` on the project root directory.
 
 ## Resources
 
