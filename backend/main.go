@@ -24,9 +24,10 @@ import (
 
 func init() {
 	envs, _ := filepath.Glob(".env*")
-
-	if err := godotenv.Load(envs...); err != nil {
-		log.Fatalln("cannot load .env:", err)
+	if len(envs) > 0 {
+		if err := godotenv.Load(envs...); err != nil {
+			log.Fatalln("cannot load .env:", err)
+		}
 	}
 }
 
