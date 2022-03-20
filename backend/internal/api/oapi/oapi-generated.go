@@ -581,7 +581,6 @@ func (siw *ServerInterfaceWrapper) GetAsset(w http.ResponseWriter, r *http.Reque
 	var id string
 
 	if err := runtime.BindStyledParameter("simple", false, "id", chi.URLParam(r, "id"), &id); err != nil {
-		err = fmt.Errorf("invalid format for parameter id: %w", err)
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{err, "id"})
 		return
 	}
@@ -606,16 +605,14 @@ func (siw *ServerInterfaceWrapper) Login(w http.ResponseWriter, r *http.Request)
 	// ------------- Required query parameter "username" -------------
 
 	if err := runtime.BindQueryParameter("form", true, true, "username", r.URL.Query(), &params.Username); err != nil {
-		err = fmt.Errorf("invalid format for parameter username: %w", err)
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{err, "username"})
+		siw.ErrorHandlerFunc(w, r, &RequiredParamError{err, "username"})
 		return
 	}
 
 	// ------------- Required query parameter "password" -------------
 
 	if err := runtime.BindQueryParameter("form", true, true, "password", r.URL.Query(), &params.Password); err != nil {
-		err = fmt.Errorf("invalid format for parameter password: %w", err)
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{err, "password"})
+		siw.ErrorHandlerFunc(w, r, &RequiredParamError{err, "password"})
 		return
 	}
 
@@ -641,7 +638,6 @@ func (siw *ServerInterfaceWrapper) GetNextPosts(w http.ResponseWriter, r *http.R
 	// ------------- Optional query parameter "prev_id" -------------
 
 	if err := runtime.BindQueryParameter("form", true, false, "prev_id", r.URL.Query(), &params.PrevID); err != nil {
-		err = fmt.Errorf("invalid format for parameter prev_id: %w", err)
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{err, "prev_id"})
 		return
 	}
@@ -696,7 +692,6 @@ func (siw *ServerInterfaceWrapper) DeletePost(w http.ResponseWriter, r *http.Req
 	var id ID
 
 	if err := runtime.BindStyledParameter("simple", false, "id", chi.URLParam(r, "id"), &id); err != nil {
-		err = fmt.Errorf("invalid format for parameter id: %w", err)
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{err, "id"})
 		return
 	}
@@ -723,16 +718,14 @@ func (siw *ServerInterfaceWrapper) Register(w http.ResponseWriter, r *http.Reque
 	// ------------- Required query parameter "username" -------------
 
 	if err := runtime.BindQueryParameter("form", true, true, "username", r.URL.Query(), &params.Username); err != nil {
-		err = fmt.Errorf("invalid format for parameter username: %w", err)
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{err, "username"})
+		siw.ErrorHandlerFunc(w, r, &RequiredParamError{err, "username"})
 		return
 	}
 
 	// ------------- Required query parameter "password" -------------
 
 	if err := runtime.BindQueryParameter("form", true, true, "password", r.URL.Query(), &params.Password); err != nil {
-		err = fmt.Errorf("invalid format for parameter password: %w", err)
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{err, "password"})
+		siw.ErrorHandlerFunc(w, r, &RequiredParamError{err, "password"})
 		return
 	}
 
@@ -770,7 +763,6 @@ func (siw *ServerInterfaceWrapper) GetUser(w http.ResponseWriter, r *http.Reques
 	var username string
 
 	if err := runtime.BindStyledParameter("simple", false, "username", chi.URLParam(r, "username"), &username); err != nil {
-		err = fmt.Errorf("invalid format for parameter username: %w", err)
 		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{err, "username"})
 		return
 	}
@@ -788,32 +780,74 @@ func (siw *ServerInterfaceWrapper) GetUser(w http.ResponseWriter, r *http.Reques
 }
 
 type UnescapedCookieParamError struct {
-	error
+	err       error
+	paramName string
 }
+
+// Error implements error.
+func (err UnescapedCookieParamError) Error() string {
+	return fmt.Sprintf("error unescaping cookie parameter %s: %v", err.paramName, err.err)
+}
+
+func (err UnescapedCookieParamError) Unwrap() error { return err.err }
 
 type UnmarshalingParamError struct {
-	error
+	err       error
 	paramName string
 }
+
+// Error implements error.
+func (err UnmarshalingParamError) Error() string {
+	return fmt.Sprintf("error unmarshaling parameter %s as JSON: %v", err.paramName, err.err)
+}
+
+func (err UnmarshalingParamError) Unwrap() error { return err.err }
 
 type RequiredParamError struct {
-	error
+	err       error
 	paramName string
 }
 
+// Error implements error.
+func (err RequiredParamError) Error() string {
+	if err.err == nil {
+		return fmt.Sprintf("query parameter %s is required, but not found", err.paramName)
+	} else {
+		return fmt.Sprintf("query parameter %s is required, but errored: %s", err.paramName, err.err)
+	}
+}
+
+func (err RequiredParamError) Unwrap() error { return err.err }
+
 type RequiredHeaderError struct {
-	error
 	paramName string
+}
+
+// Error implements error.
+func (err RequiredHeaderError) Error() string {
+	return fmt.Sprintf("header parameter %s is required, but not found", err.paramName)
 }
 
 type InvalidParamFormatError struct {
-	error
+	err       error
 	paramName string
 }
 
+// Error implements error.
+func (err InvalidParamFormatError) Error() string {
+	return fmt.Sprintf("invalid format for parameter %s: %v", err.paramName, err.err)
+}
+
+func (err InvalidParamFormatError) Unwrap() error { return err.err }
+
 type TooManyValuesForParamError struct {
-	error
+	NumValues int
 	paramName string
+}
+
+// Error implements error.
+func (err TooManyValuesForParamError) Error() string {
+	return fmt.Sprintf("expected one value for %s, got %d", err.paramName, err.NumValues)
 }
 
 // ParameterName is an interface that is implemented by error types that are
@@ -824,6 +858,7 @@ type ParameterError interface {
 	ParamName() string
 }
 
+func (err UnescapedCookieParamError) ParamName() string  { return err.paramName }
 func (err UnmarshalingParamError) ParamName() string     { return err.paramName }
 func (err RequiredParamError) ParamName() string         { return err.paramName }
 func (err RequiredHeaderError) ParamName() string        { return err.paramName }

@@ -16,10 +16,16 @@ let goapi-gen = pkgs.buildGoModule {
 		# 	sha256 = "0jgvjf51bzfm620gy6r9fxnyq9yi54vvif8jzfrrn4rj13zqvhc3";
 		# };
 
-		patches = let patch = c: "https://github.com/diamondburned/goapi-gen/commit/${c}.patch"; in [
-			(builtins.fetchurl (patch "21e6938b8dc9732b71f9f31dceddeb0697fff6c3")) # PR #82
-			(builtins.fetchurl (patch "49e462fafc1d82572218bdec3917d50c98ebed2e")) # PR #80
-		];
+		patches =
+			with builtins;
+			let commit = user: c: fetchurl "https://github.com/${user}/goapi-gen/commit/${c}.patch";
+				pr     = user: c: fetchurl "https://github.com/${user}/goapi-gen/pull/${toString c}.patch";
+			in [
+				(pr "discord-gophers" 80)
+				(pr "discord-gophers" 82)
+				(pr "discord-gophers" 83)
+				(pr "discord-gophers" 85)
+			];
 
 		vendorSha256 = "1aq24cx5qirgzjcahzqjkzc50687xj2vqz623f56q5j5m2x8cj73";
 	};
