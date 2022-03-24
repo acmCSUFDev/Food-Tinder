@@ -2,20 +2,18 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"os/signal"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/acmCSUFDev/Food-Tinder/backend/foodtinder"
 	"github.com/acmCSUFDev/Food-Tinder/backend/internal/api"
-	"github.com/acmCSUFDev/Food-Tinder/backend/internal/store/inmemory"
+	"github.com/acmCSUFDev/Food-Tinder/backend/internal/store"
+	"github.com/acmCSUFDev/Food-Tinder/backend/internal/store/fileserver"
 	"github.com/diamondburned/listener"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -32,37 +30,30 @@ func init() {
 }
 
 func main() {
-	dbURL, err := url.Parse(os.Getenv("DB_ADDRESS"))
-	if err != nil {
-		log.Fatalln("invalid $DB_ADDRESS:", err)
+	var (
+		dbAddress = os.Getenv("DB_ADDRESS")
+		assetPath = os.Getenv("ASSET_PATH")
+	)
+
+	var fileServer foodtinder.FileServer
+	if assetPath != "" {
+		fileServer = fileserver.OnDisk(assetPath)
+	} else {
+		fileServer = fileserver.InMemory(nil)
 	}
 
-	var dataServer foodtinder.Server
-
-	switch dbURL.Scheme {
-	case "mock":
-		// Hack because url.Parse confuses some of the path as the domain.
-		b, err := os.ReadFile(strings.TrimPrefix(dbURL.String(), "mock://"))
-		if err != nil {
-			log.Fatalf("cannot read mock database at %s: %v", dbURL.Path, err)
-		}
-
-		var state inmemory.State
-		if err := json.Unmarshal(b, &state); err != nil {
-			log.Fatalln("cannot parse mock database:", err)
-		}
-
-		dataServer = inmemory.NewServer(state)
-
-	default:
-		log.Fatalf("unsupported database address scheme %q", dbURL.Scheme)
+	dataStore, err := store.Open(dbAddress, store.Opts{
+		FileServer: fileServer,
+	})
+	if err != nil {
+		log.Fatalln("cannot set up data server:", err)
 	}
 
 	r := chi.NewMux()
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.CleanPath)
 	r.Use(middleware.Timeout(15 * time.Second))
-	r.Mount("/", api.Handler(dataServer))
+	r.Mount("/", api.Handler(dataStore))
 
 	// SIGINT handler in a cancellable context.
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)

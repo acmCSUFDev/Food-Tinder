@@ -2,12 +2,12 @@
 package inmemory
 
 import (
-	"io/fs"
 	"log"
 	"sort"
 	"sync"
 
 	"github.com/acmCSUFDev/Food-Tinder/backend/foodtinder"
+	"github.com/acmCSUFDev/Food-Tinder/backend/internal/store/fileserver"
 	"github.com/bwmarrin/snowflake"
 )
 
@@ -38,7 +38,6 @@ type State struct {
 	Users    []User
 	Posts    []foodtinder.Post
 	Sessions []foodtinder.Session
-	Assets   map[string][]byte
 }
 
 func (s *State) sortPosts() {
@@ -51,16 +50,16 @@ type server struct {
 	mu       sync.RWMutex
 	store    State
 	sessions map[string]*foodtinder.Session
-	assetIx  uint64
+	fserver  foodtinder.FileServer
 }
 
 // NewServer creates a new on-memory data server using the given store.
-func NewServer(state State) foodtinder.Server {
-	state.sortPosts()
-
-	if state.Assets == nil {
-		state.Assets = make(map[string][]byte)
+func NewServer(state State, fserver foodtinder.FileServer) foodtinder.Server {
+	if fserver == nil {
+		fserver = fileserver.InMemory(nil)
 	}
+
+	state.sortPosts()
 
 	sessions := make(map[string]*foodtinder.Session)
 	for i, session := range state.Sessions {
@@ -70,11 +69,12 @@ func NewServer(state State) foodtinder.Server {
 	return &server{
 		store:    state,
 		sessions: sessions,
+		fserver:  fserver,
 	}
 }
 
-func (s *server) AssetServer() fs.FS {
-	return (*assetServer)(s)
+func (s *server) FileServer() foodtinder.FileServer {
+	return s.fserver
 }
 
 func (s *server) LoginServer() foodtinder.LoginServer {

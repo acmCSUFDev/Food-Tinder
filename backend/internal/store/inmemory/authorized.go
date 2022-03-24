@@ -10,6 +10,7 @@ import (
 type authorizedServer struct {
 	*server
 	session *foodtinder.Session
+	user    *User
 }
 
 func (s *authorizedServer) Logout(ctx context.Context) error {
@@ -30,8 +31,4 @@ func (s *authorizedServer) PostServer() foodtinder.PostServer {
 
 func (s *authorizedServer) UserServer() foodtinder.UserServer {
 	return (*userServer)(s)
-}
-
-func (s *authorizedServer) AssetUploadServer() foodtinder.AssetUploadServer {
-	return (*assetUploadServer)(s)
 }

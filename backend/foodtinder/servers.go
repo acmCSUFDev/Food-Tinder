@@ -8,10 +8,25 @@ import (
 
 // Server describes the top-level server information.
 type Server interface {
-	AssetServer() fs.FS
+	FileServer() FileServer
 	LoginServer() LoginServer
 	AuthorizerServer() AuthorizerServer
 	AuthorizedServer(s *Session) AuthorizedServer
+}
+
+// FileServer describes a service for serving and creating files.
+//
+// TODO: consider if we should keep track of which user uploaded which asset.
+// Otherwise, we can smartly reference-count them.
+type FileServer interface {
+	fs.FS
+	// fs.StatFS
+
+	// Create creates a file with the content from the given Reader. The new
+	// asset hash is returned, or an error if there's one. Create may be called
+	// concurrently; the implementation should guarantee that everything is
+	// atomic and that there is no collision.
+	Create(s *Session, src io.Reader) (string, error)
 }
 
 // LoginServer describes a service serving Sessions.
@@ -37,7 +52,6 @@ type AuthorizedServer interface {
 
 	PostServer() PostServer
 	UserServer() UserServer
-	AssetUploadServer() AssetUploadServer
 }
 
 // PostServer is a service serving Posts.
@@ -62,24 +76,13 @@ type UserServer interface {
 	User(ctx context.Context, username string) (*User, error)
 	// Self returns the current user.
 	Self(context.Context) (*Self, error)
-	// FoodPreferences fetches the food preferences of the current user.
-	FoodPreferences(ctx context.Context) (*FoodPreferences, error)
-	// SetFoodPreferences overrieds the food preferences of the current user.
-	SetFoodPreferences(ctx context.Context, prefs *FoodPreferences) error
-	// TODO: UpdateSelf().
+	// UpdateSelf updates the current user. This method should change everything
+	// except the Username and Password.
+	UpdateSelf(context.Context, *Self) error
+	// ChangePassword changes the password of the current user. All existing
+	// sessions except for this one should be invalidated.
+	ChangePassword(ctx context.Context, newPassword string) error
 }
 
 // MaxAssetSize is the maximum size in bytes that an asset should be.
 const MaxAssetSize = 1 << 20 // 1MB
-
-// AssetUploadServer describes a service for creating files.
-//
-// TODO: consider if we should keep track of which user uploaded which asset.
-// Otherwise, we can smartly reference-count them.
-type AssetUploadServer interface {
-	// Upload creates a file with the content from the given Reader. The new
-	// asset hash is returned, or an error if there's one. Create may be called
-	// concurrently; the implementation should guarantee that everything is
-	// atomic and that there is no collision.
-	Upload(r io.Reader) (string, error)
-}

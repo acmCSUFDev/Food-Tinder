@@ -21,16 +21,28 @@ const SnowflakeEpoch = int64(1577865600 * (time.Second / time.Millisecond))
 func init() { snowflake.Epoch = SnowflakeEpoch }
 
 // Error constants.
-var (
+const (
 	// ErrNotFound is used when a resource is not found.
-	ErrNotFound = errors.New("not found")
+	ErrNotFound = userError("not found")
 	// ErrInvalidLogin is returned when a user logs in with an unknown
 	// combination of username and password.
-	ErrInvalidLogin = errors.New("invalid username or password")
+	ErrInvalidLogin = userError("invalid username or password")
 	// ErrUsernameExists is returned by Register if the user tries to make an
 	// account with an existing username.
-	ErrUsernameExists = errors.New("an account with the username already exists")
+	ErrUsernameExists = userError("an account with the username already exists")
+	// ErrNoSession is returned on an unknown or expired token session.
+	ErrNoSession = userError("no such session found, possibly expired")
 )
+
+// IsUserError returns true if the error is a user error.
+func IsUserError(err error) bool {
+	var userErr userError
+	return errors.As(err, &userErr)
+}
+
+type userError string
+
+func (err userError) Error() string { return string(err) }
 
 // Date describes a Date with undefined time.
 type Date struct {
@@ -132,8 +144,8 @@ type Session struct {
 // Self extends User and contains private information about that user.
 type Self struct {
 	User
-	// Birthday is the user's birthday.
-	Birthday Date
+	Birthday    Date
+	Preferences FoodPreferences
 }
 
 // AllowedUsernameRunes is a list of validators that validate a username. Its
@@ -224,6 +236,8 @@ type Post struct {
 	Tags []foods.Name
 	// Location is the location where the post was made.
 	Location string
+	// Likes is the number of likes of this post.
+	Likes int
 }
 
 // Validate validates the Post.

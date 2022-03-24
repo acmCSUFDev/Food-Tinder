@@ -36,29 +36,29 @@ func (s *userServer) Self(ctx context.Context) (*foodtinder.Self, error) {
 	return &self, nil
 }
 
-func (s *userServer) FoodPreferences(ctx context.Context) (*foodtinder.FoodPreferences, error) {
+func (s *userServer) UpdateSelf(ctx context.Context, self *foodtinder.Self) error {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-
-	u, err := s.self()
-	if err != nil {
-		return nil, err
-	}
-
-	prefs := u.Preferences // copy
-	return &prefs, nil
-}
-
-func (s *userServer) SetFoodPreferences(ctx context.Context, prefs *foodtinder.FoodPreferences) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
 
 	u, err := s.self()
 	if err != nil {
 		return err
 	}
 
-	u.Preferences = *prefs
+	u.Self = *self
+	return nil
+}
+
+func (s *userServer) ChangePassword(ctx context.Context, password string) error {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	u, err := s.self()
+	if err != nil {
+		return err
+	}
+
+	u.Password = password
 	return nil
 }
 
