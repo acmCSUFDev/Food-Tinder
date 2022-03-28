@@ -3,11 +3,14 @@
 </script>
 
 <div>
+	<!-- make login its own page in ./routes -->
 	<Login />
 </div>
 
 <style>
 	div {
+		padding-top: 12vh;
+		box-sizing: border-box;
 		background: linear-gradient(
 			to bottom,
 			rgba(85, 205, 252, 1) 0%,

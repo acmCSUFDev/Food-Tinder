@@ -9,9 +9,12 @@
 <!-- <p>AHHHHHHHHHHH</p> -->
 <style>
 	input {
-		border: black 1px solid;
+		border: white 1px solid;
 		border-radius: 50px;
 		padding: 5px 10px;
-		margin: 10px;
+		width: 180px;
+		font-family: Arial, Helvetica, sans-serif;
+		font-size: 22px;
+		font-weight: 100;
 	}
 </style>
