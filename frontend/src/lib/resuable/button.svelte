@@ -1,20 +1,10 @@
 <script>
 	export let btnType = '';
 	export let btnContent = '';
-	let activeButton = false;
-
-	let clicked = () => {
-		if (activeButton === true) {
-			activeButton = false;
-		} else {
-			activeButton = true;
-		}
-	};
+	export let activeButton = false;
 </script>
 
-<button on:click|once={clicked} class="{btnType}{activeButton === true ? 'Active' : ''}"
-	>{btnContent}</button
->
+<button class="{btnType}{activeButton === true ? 'Active' : ''}">{btnContent}</button>
 
 <style>
 	button {

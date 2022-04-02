@@ -1,25 +1,24 @@
 <script>
+	import UserConstraints from '../lib/components/requirements.svelte';
 	import Login from '../lib/components/login-page.svelte';
+	import SignUp from '../lib/components/signup-page.svelte';
+	let loggedIn = false;
+	let registered = false;
+
+	function clickedLoginEvent(e) {
+		loggedIn = e.detail;
+		console.log('successfully logged in');
+	}
+	// function clickedSignUpEvent(e) {
+	// 	registered = e.detail;
+	// 	console.log('successfully signed up');
+	// }
 </script>
 
-<div>
-	<!-- make login its own page in ./routes -->
-	<Login />
-</div>
-
-<style>
-	div {
-		padding-top: 12vh;
-		box-sizing: border-box;
-		background: linear-gradient(
-			to bottom,
-			rgba(85, 205, 252, 1) 0%,
-			rgba(147, 194, 255, 1) 25%,
-			rgba(200, 181, 245, 1) 50%,
-			rgba(234, 171, 217, 1) 75%,
-			rgba(247, 168, 184, 1) 100%
-		);
-		height: 100vh;
-	}
-	/* opacity: 0.95; */
-</style>
+{#if loggedIn && registered}
+	<UserConstraints />
+{:else if !registered && !loggedIn}
+	<SignUp />
+{:else}
+	<Login on:loginClick={clickedLoginEvent} />
+{/if}
