@@ -13,7 +13,7 @@
 		flex-direction: column;
 		align-items: center;
 		gap: 10px;
-		width: 170px;
+		width: 220px;
 	}
 
 	img {

@@ -1,9 +1,10 @@
 <script>
-	export let placeholderText = 'unknown';
+	export let placeholderText = '';
+	export let value = '';
 </script>
 
 <div>
-	<input type="text" placeholder={placeholderText} />
+	<input type="text" placeholder={placeholderText} bind:value/>
 </div>
 
 <!-- <p>AHHHHHHHHHHH</p> -->
@@ -11,10 +12,10 @@
 	input {
 		border: white 1px solid;
 		border-radius: 50px;
-		padding: 5px 10px;
-		width: 180px;
+		padding: 10px 15px;
+		width: 220px;
 		font-family: Arial, Helvetica, sans-serif;
-		font-size: 22px;
+		font-size: 18px;
 		font-weight: 100;
 	}
 </style>
