@@ -28,10 +28,6 @@ func (s *AuthorizedServer) UserServer() foodtinder.UserServer {
 	return (*UserServer)(s)
 }
 
-func (s *AuthorizedServer) AssetUploadServer() foodtinder.AssetUploadServer {
-	return s.Server.Assets.UploadServer()
-}
-
 func (s *AuthorizedServer) Session() *foodtinder.Session {
 	return s.session
 }

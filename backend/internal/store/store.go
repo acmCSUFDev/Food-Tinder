@@ -38,10 +38,11 @@ func Open(uri string, opts Opts) (Server, error) {
 	case "mock":
 		var state inmemory.State
 		url.Path = strings.TrimPrefix(url.String(), "mock://")
+		url.Host = ""
 
 		if url.Path != "" {
 			// Hack because url.Parse confuses some of the path as the domain.
-			b, err := os.ReadFile(strings.TrimPrefix(url.String(), "mock://"))
+			b, err := os.ReadFile(url.Path)
 			if err != nil {
 				return nil, fmt.Errorf("cannot read mock database at %s: %w", url.Path, err)
 			}

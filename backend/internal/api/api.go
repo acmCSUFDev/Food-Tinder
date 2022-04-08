@@ -309,7 +309,7 @@ func (h handler) GetLikedPosts(w http.ResponseWriter, r *http.Request) *oapi.Res
 }
 
 func (h handler) GetAsset(w http.ResponseWriter, r *http.Request, id string) *oapi.Response {
-	f, err := h.Server.AssetServer().Open(id)
+	f, err := h.Server.FileServer().Open(id)
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
 			return oapi.GetAssetJSON404Response(oapi.FormError{
@@ -329,10 +329,10 @@ func (h handler) GetAsset(w http.ResponseWriter, r *http.Request, id string) *oa
 func (h handler) UploadAsset(w http.ResponseWriter, r *http.Request) *oapi.Response {
 	body := newMaxBytesReader(r.Body, foodtinder.MaxAssetSize)
 
-	asrv := h.Server.AuthorizedServer(sessionFromContext(r.Context()))
-	usrv := asrv.AssetUploadServer()
+	usrv := h.Server.FileServer()
+	sess := sessionFromContext(r.Context())
 
-	id, err := usrv.Upload(body)
+	id, err := usrv.Create(sess, body)
 	if err != nil {
 		if errors.Is(err, errBodyTooLarge) {
 			return oapi.UploadAssetJSON413Response(oapi.RespErr(err))
