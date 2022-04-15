@@ -2,6 +2,8 @@
 	import InputFieldComponent from '../lib/resuable/input-field.svelte';
 	import Buttons from '../lib/resuable/button.svelte';
 	import BobaBub from '../lib/components/bobaBub.svelte';
+	import { onMount } from 'svelte';
+	/* import * as api from '../lib/api'; */
 
 	let loginErrorMsg = '';
 
@@ -21,13 +23,19 @@
 	function loginError(e) {
 		loginErrorMsg = e.detail;
 	}
+
+	/* onMount(async () => { */
+	/* 	const a = api.login('joe', 'mama'); */
+	/* 	console.log(a); */
+	/* }); */
 </script>
+
 <div class="background">
 	<div class="loginComponents">
 		<BobaBub />
-		<InputFieldComponent placeholderText={'Username'} bind:value = {logInButton.loginInfo}/>
-		<InputFieldComponent placeholderText={'Password'} bind:value = {logInButton.passInfo}/>
-		<Buttons {...logInButton} on:failedLogin={loginError}/>
+		<InputFieldComponent placeholderText={'Username'} bind:value={logInButton.loginInfo} />
+		<InputFieldComponent placeholderText={'Password'} bind:value={logInButton.passInfo} />
+		<Buttons {...logInButton} on:failedLogin={loginError} />
 		<Buttons {...signUpButton} />
 		<!-- include error messages upon failed login -->
 		{#if loginErrorMsg !== ''}
@@ -48,7 +56,6 @@
 		color: #ff0000;
 		font-weight: 700;
 	}
-
 
 	.background {
 		padding-top: 12vh;

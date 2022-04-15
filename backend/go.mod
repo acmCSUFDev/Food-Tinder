@@ -23,6 +23,7 @@ require (
 
 require (
 	github.com/ghodss/yaml v1.0.0 // indirect
+	github.com/go-chi/cors v1.2.0 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/swag v0.19.15 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
