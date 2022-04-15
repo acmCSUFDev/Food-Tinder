@@ -2,10 +2,30 @@
 	// import Buttons from '../resuable/button.svelte';
 </script>
 
-<h3>
-	Lorem ipsum dolor sit, amet consectetur adipisicing elit. Expedita harum veniam at quaerat
-	recusandae, eos praesentium dicta nemo voluptatum necessitatibus sint asperiores aspernatur quam
-	ducimus excepturi iure id corrupti fuga cupiditate quisquam obcaecati similique explicabo.
-	Praesentium fuga fugiat consectetur eos!
-</h3>
-<!-- <Buttons btnType={'login'} btnContent={'Log In'} /> -->
+<div class="page">
+	<div class="wrapper">
+		<div class="btnContainer">
+			<h3>left</h3>
+			<h3>right</h3>
+		</div>
+		<h3>more info</h3>
+	</div>
+</div>
+
+<style>
+	/* h3 {
+		position: absolute;
+	} */
+
+	.wrapper h3 {
+		display: flex;
+		justify-content: center;
+	}
+
+	.btnContainer {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		height: 80vh;
+	}
+</style>

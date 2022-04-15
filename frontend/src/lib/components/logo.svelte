@@ -1,5 +1,5 @@
 <div>
-	<img src="./components/images/bobaBub.png" alt="idk how to put the img here (bobaBub.svelte)" />
+	<img src="/static/bobaBub.png" alt="idk how to put the img here (bobaBub.svelte)" />
 	<h2>Food Tinder</h2>
 </div>
 

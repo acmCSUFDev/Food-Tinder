@@ -13,7 +13,7 @@
 	let registerButton = {
 		btnType: 'signup2',
 		btnContent: 'Sign Up',
-		btnRoute: '/',
+		btnRoute: '/login',
 	};
 </script>
 
@@ -37,13 +37,13 @@
 	.item-wrapper {
 		display: flex;
 		flex-direction: column;
-		gap: 100px; 
+		gap: 5vh; 
 	}
 
 	.input {
 		display: flex;
 		flex-direction: column;
-		gap: 15px;
+		gap: 3vh;
 	}
 
 	.signUpComponents {

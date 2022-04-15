@@ -59,4 +59,9 @@
 		background-color: rgba(255, 255, 255, 0.45);
 		border: rgba(255, 255, 255, 0.45) 1px solid;
 	}
+	.signup2 {
+		color: white;
+		background-color: rgba(168, 85, 252, 0.57);
+		border: rgba(168, 85, 252, 0.57) 1px solid;
+	}
 </style>
