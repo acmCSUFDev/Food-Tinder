@@ -1,19 +1,11 @@
 <script>
-
 </script>
 
-<div class="background">
-	<div class="loggingIn">
-		Logging in
-	</div>
-</div>
+<main class="background">
+	<div class="loggingIn">Logging in</div>
+</main>
 
 <style>
-	.background {
-
-	}
-
 	.loggingIn {
-		
 	}
 </style>

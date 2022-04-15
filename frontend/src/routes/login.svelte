@@ -32,11 +32,10 @@
 
 <div class="background">
 	<div class="loginComponents">
-
 		<Logo />
-		<InputFieldComponent placeholderText={'Username'} bind:value = {logInButton.loginInfo}/>
-		<InputFieldComponent placeholderText={'Password'} bind:value = {logInButton.passInfo}/>
-		<Buttons {...logInButton} on:failedLogin={loginError}/>
+		<InputFieldComponent placeholderText={'Username'} bind:value={logInButton.loginInfo} />
+		<InputFieldComponent placeholderText={'Password'} bind:value={logInButton.passInfo} />
+		<Buttons {...logInButton} on:failedLogin={loginError} />
 
 		<Buttons {...signUpButton} />
 		<!-- include error messages upon failed login -->
@@ -58,25 +57,6 @@
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
-	}
-
-	.error {
-		color: #ff0000;
-		font-weight: 700;
-	}
-
-	.background {
-		padding-top: 12vh;
-		box-sizing: border-box;
-		background: linear-gradient(
-			to bottom,
-			rgba(247, 168, 184, 1) 0%,
-			rgba(234, 171, 217, 1) 25%,
-			rgba(200, 181, 245, 1) 50%,
-			rgba(147, 194, 255, 1) 75%,
-			rgba(85, 205, 252, 1) 100%
-		);
-		height: 100vh;
 	}
 
 	@media (max-width: 3000px) {
