@@ -1,7 +1,7 @@
 <script>
-	import InputFieldComponent from '../lib/resuable/input-field.svelte';
-	import Buttons from '../lib/resuable/button.svelte';
-	import RegisterBox from '../lib/components/register-box.svelte'
+	import InputFieldComponent from '../lib/reusable/input-field.svelte';
+	import Buttons from '../lib/reusable/button.svelte';
+	import RegisterBox from '../lib/components/register-box.svelte';
 
 	let signupInformation = {
 		username: '',
@@ -13,7 +13,7 @@
 	let registerButton = {
 		btnType: 'signup2',
 		btnContent: 'Sign Up',
-		btnRoute: '/login',
+		btnRoute: '/login'
 	};
 </script>
 
@@ -22,22 +22,27 @@
 		<div class="item-wrapper">
 			<div class="input">
 				<RegisterBox />
-				<InputFieldComponent placeholderText={'Username'} bind:value = {signupInformation.username}/>
-				<InputFieldComponent placeholderText={'Display Name (optional)'} bind:value = {signupInformation.displayName}/>
-				<InputFieldComponent placeholderText={'Password'} bind:value = {signupInformation.password}/>
-				<InputFieldComponent placeholderText={'Verify Password'} bind:value = {signupInformation.passVerify}/>
+				<InputFieldComponent placeholderText={'Username'} bind:value={signupInformation.username} />
+				<InputFieldComponent
+					placeholderText={'Display Name (optional)'}
+					bind:value={signupInformation.displayName}
+				/>
+				<InputFieldComponent placeholderText={'Password'} bind:value={signupInformation.password} />
+				<InputFieldComponent
+					placeholderText={'Verify Password'}
+					bind:value={signupInformation.passVerify}
+				/>
 			</div>
-			<Buttons {...registerButton}/>
+			<Buttons {...registerButton} />
 		</div>
 	</div>
 </div>
 
 <style>
-
 	.item-wrapper {
 		display: flex;
 		flex-direction: column;
-		gap: 5vh; 
+		gap: 5vh;
 	}
 
 	.input {

@@ -1,9 +1,9 @@
 <script>
-	import InputFieldComponent from '../lib/resuable/input-field.svelte';
-	import Buttons from '../lib/resuable/button.svelte';
+	import InputFieldComponent from '../lib/reusable/input-field.svelte';
+	import Buttons from '../lib/reusable/button.svelte';
 
 	import Logo from '../lib/components/logo.svelte';
-	/* import * as api from '../lib/api'; */
+	// import * as api from '../lib/api';
 
 	let loginErrorMsg = '';
 
@@ -24,13 +24,13 @@
 		loginErrorMsg = e.detail;
 	}
 
-	/* onMount(async () => { */
-	/* 	const a = await api.login('joe', 'mama'); */
-	/* 	console.log(a); */
-	/* }); */
+	// function onMount(async () => {
+	//  	const a = await api.login('joe', 'mama');
+	//  	console.log(a);
+	//  });
 </script>
 
-<div class="background">
+<main class="background">
 	<div class="loginComponents">
 		<Logo />
 		<InputFieldComponent placeholderText={'Username'} bind:value={logInButton.loginInfo} />
@@ -43,15 +43,9 @@
 			<p class="error">Error: {loginErrorMsg}</p>
 		{/if}
 	</div>
-</div>
+</main>
 
 <style>
-	/* @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,500;1,700&family=Fredoka:wght@300;400&family=Open+Sans&family=Poppins:wght@200;300;400&family=Roboto:ital,wght@0,400;1,300&display=swap');
-
-	* {
-    	font-style: 'Poppins', sans-serif;
-	} */
-
 	.loginComponents {
 		display: flex;
 		flex-direction: column;
