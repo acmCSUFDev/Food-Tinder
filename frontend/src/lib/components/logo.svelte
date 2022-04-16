@@ -1,5 +1,5 @@
 <div>
-	<img src="/static/bobaBub.png" alt="idk how to put the img here (bobaBub.svelte)" />
+	<img src="/static/bobaBub.png" alt="Mascot of Food Tinder, Boba Bub" />
 	<h2>Food Tinder</h2>
 </div>
 

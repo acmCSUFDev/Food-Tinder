@@ -20,10 +20,11 @@
     "prettier": "^2.5.1",
     "prettier-plugin-svelte": "^2.5.0",
     "svelte": "^3.44.0",
-    "widdershins": "^4.0.1"
+    "widdershins": "^4.0.1",
+    "oazapfts": "^3.5.0",
+    "svelte-language-server": "^0.14.26"
   },
   "type": "module",
   "dependencies": {
-    "oazapfts": "^3.5.0"
   }
 }
