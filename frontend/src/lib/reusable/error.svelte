@@ -1,9 +1,18 @@
 <script>
+	import * as svelte from 'svelte';
+
 	export let box = false;
 	export let msg = '';
+	export let mounted = false;
+
+	svelte.onMount(() => {
+		// Prevent the box from showing up while the JS is loading by hiding it
+		// by default until everything is initialized.
+		mounted = true;
+	});
 </script>
 
-<p class="error" class:box>
+<p class="error" class:box class:mounted>
 	{#if msg}
 		<span class="prefix">Error:</span> {msg}
 	{:else}
@@ -12,6 +21,7 @@
 </p>
 
 <style>
+	p.error:not(.mounted),
 	p.error:empty {
 		display: none; /* TODO: animate */
 	}

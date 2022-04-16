@@ -1,10 +1,10 @@
 <script>
-	import InputField from '../lib/reusable/input-field.svelte';
-	import Button from '../lib/reusable/button.svelte';
-	import Fields from '../lib/reusable/fields.svelte';
-	import Error from '../lib/reusable/error.svelte';
-	import Card from '../lib/reusable/card.svelte';
-	import Logo from '../lib/reusable/logo.svelte';
+	import InputField from '$lib/reusable/input-field.svelte';
+	import Button from '$lib/reusable/button.svelte';
+	import Fields from '$lib/reusable/fields.svelte';
+	import Error from '$lib/reusable/error.svelte';
+	import Card from '$lib/reusable/card.svelte';
+	import Logo from '$lib/reusable/logo.svelte';
 
 	let username = '';
 	let password = '';

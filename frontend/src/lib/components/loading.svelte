@@ -1,5 +1,5 @@
 <script>
-	import Spinner from '../reusable/spinner.svelte';
+	import Spinner from '$lib/reusable/spinner.svelte';
 </script>
 
 <div class="spin-logo">
