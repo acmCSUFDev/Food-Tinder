@@ -46,21 +46,16 @@
 </main>
 
 <style>
-	.loginComponents {
+	main.background {
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
 	}
 
-	@media (max-width: 3000px) {
-		.loginComponents {
-			gap: 1vw;
-		}
-	}
-	@media (max-width: 900px) {
-		.loginComponents {
-			gap: 6vw;
-		}
+	.loginComponents {
+		display: flex;
+		flex-direction: column;
+		gap: 28px;
 	}
 </style>

@@ -1,12 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
 
+:root {
+	--accent-background: #b78ae6;
+	--accent-foreground: #a855fc;
+}
+
 .error {
 	color: #ff0000;
 	font-weight: 700;
 }
 
 main.background {
-	padding-top: 12vh;
 	box-sizing: border-box;
 	background: linear-gradient(
 		to bottom,
@@ -21,4 +25,6 @@ main.background {
 
 body {
 	font-family: 'Poppins', sans-serif;
+	margin: 0;
+	padding: 0;
 }
