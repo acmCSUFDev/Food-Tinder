@@ -4,7 +4,7 @@
 </script>
 
 <div>
-	<input type="text" placeholder={placeholderText} bind:value/>
+	<input type="text" placeholder={placeholderText} bind:value />
 </div>
 
 <!-- <p>AHHHHHHHHHHH</p> -->
@@ -13,9 +13,7 @@
 		border: white 1px solid;
 		border-radius: 50px;
 		padding: 10px 15px;
-		width: 220px;
 		font-family: Arial, Helvetica, sans-serif;
 		font-size: 18px;
-		font-weight: 100;
 	}
 </style>

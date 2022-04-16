@@ -14,4 +14,11 @@ export function setAuthorization(auth: string) {
 	api.defaults.headers.authorization = auth;
 }
 
+export function errorMsg(err) {
+	if (err.data && err.data.message) {
+		return err.data.message;
+	}
+	return `${err}`;
+}
+
 export * from "./openapi";
