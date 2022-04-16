@@ -1,67 +1,67 @@
 <script>
-	import { createEventDispatcher } from 'svelte';
-
-	export let btnType = '';
-	export let btnContent = '';
-	export let btnRoute = '#';
-	export let loginInfo = '';
-	export let passInfo = '';
-
-	const dispatch = createEventDispatcher();
-
-	function failedLoginDispatch() {
-		if(loginInfo === '') {
-			dispatch('failedLogin', 'username cannot be left blank');
-		} else if (passInfo === '') {
-			dispatch('failedLogin', 'password cannot be left blank');
-		} else {
-			dispatch('failedLogin', 'username and password cannot be left blank');
-		}
-	}
+	export let suggested = false;
+	export let secondary = false;
+	export let disabled = false;
+	export let href = '';
 </script>
-{#if (loginInfo !== '') && (passInfo !== '')}
-	<a href="{btnRoute}">
-		<button class="{btnType}">{btnContent}</button>
-	</a>
-{:else if (btnType === 'signup') || (btnType === 'signup2' )}
-<a href="{btnRoute}">
-	<button class="{btnType}">{btnContent}</button>
-</a>
-{:else}
-<button class="{btnType}" on:click={failedLoginDispatch}>{btnContent}</button>
-{/if}
 
+{#if href}
+	<a class:suggested class:secondary class:disabled {href} role="button">
+		<slot />
+	</a>
+{:else}
+	<button class:suggested class:secondary class:disabled>
+		<slot />
+	</button>
+{/if}
 
 <style>
 	a {
 		text-decoration: none;
 	}
-	button {
-		border: black 1px solid;
+
+	* {
+		border: 2px solid transparent;
 		border-radius: 50px;
 		padding: 10px 15px;
-		/* min-width: 60vw; */
-		width: 250px;
+
 		display: flex;
 		justify-content: center;
+
 		font-family: Arial, Helvetica, sans-serif;
 		font-size: 18px;
-		font-weight: 100;
+
+		background-color: #1d1d1d;
+		color: #eee;
+
+		transition: ease 100ms all;
 	}
 
-	.login {
-		color: white;
-		background-color: rgba(168, 85, 252, 0.57);
-		border: rgba(168, 85, 252, 0.57) 1px solid;
+	*.secondary {
+		color: var(--accent-foreground);
+		background-color: white;
 	}
-	.signup {
-		color: rgba(154, 72, 235, 0.57);
-		background-color: rgba(255, 255, 255, 0.45);
-		border: rgba(255, 255, 255, 0.45) 1px solid;
+
+	*.secondary:hover {
+		border-color: var(--accent-foreground);
+		background-color: rgba(255, 255, 255, 0.85);
 	}
-	.signup2 {
+
+	*.suggested {
 		color: white;
-		background-color: rgba(168, 85, 252, 0.57);
-		border: rgba(168, 85, 252, 0.57) 1px solid;
+		background-color: var(--accent-border);
+		border-color: var(--accent-foreground);
+		box-shadow: 0 0 10px 0px var(--accent-foreground);
+	}
+
+	*.suggested:hover {
+		background-color: var(--accent-background);
+	}
+
+	*.disabled {
+		pointer-events: none;
+		opacity: 0.55;
+		cursor: not-allowed;
+		box-shadow: none;
 	}
 </style>

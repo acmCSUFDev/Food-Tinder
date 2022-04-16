@@ -3,7 +3,7 @@
 </script>
 
 <div class="spin-logo">
-	<Spinner slow="true" />
+	<Spinner slow />
 	<img src="/static/bobaBub.png" alt="Mascot of Food Tinder, Boba Bub" />
 </div>
 

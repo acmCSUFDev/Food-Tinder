@@ -4,10 +4,12 @@
 	import * as navigation from '$app/navigation';
 
 	svelte.onMount(() => {
-		if (!api.hasAuthorized()) {
-			// Go to /login if the user hasn't logged in yet.
+		if (api.hasAuthorized()) {
+			navigation.goto('/app');
+		} else {
 			navigation.goto('/login');
-			return;
 		}
 	});
 </script>
+
+<slot />

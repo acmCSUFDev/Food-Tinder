@@ -1,61 +1,44 @@
 <script>
-	import InputFieldComponent from '../lib/reusable/input-field.svelte';
-	import Buttons from '../lib/reusable/button.svelte';
-
-	import Logo from '../lib/components/logo.svelte';
-	// import * as api from '../lib/api';
+	import InputField from '../lib/reusable/input-field.svelte';
+	import Button from '../lib/reusable/button.svelte';
+	import Fields from '../lib/reusable/fields.svelte';
+	import Error from '../lib/reusable/error.svelte';
+	import Card from '../lib/reusable/card.svelte';
+	import Logo from '../lib/reusable/logo.svelte';
 
 	let loginErrorMsg = '';
+	let username = '';
+	let password = '';
 
-	let logInButton = {
-		btnType: 'login',
-		btnContent: 'Log In',
-		btnRoute: '/requirements',
-		loginInfo: '',
-		passInfo: ''
-	};
-	let signUpButton = {
-		btnType: 'signup',
-		btnContent: 'Sign Up',
-		btnRoute: '/signup'
-	};
-
-	function loginError(e) {
-		loginErrorMsg = e.detail;
-	}
-
-	// function onMount(async () => {
-	//  	const a = await api.login('joe', 'mama');
-	//  	console.log(a);
-	//  });
+	function login() {}
 </script>
 
-<main class="background">
-	<div class="loginComponents">
-		<Logo />
-		<InputFieldComponent placeholderText={'Username'} bind:value={logInButton.loginInfo} />
-		<InputFieldComponent placeholderText={'Password'} bind:value={logInButton.passInfo} />
-		<Buttons {...logInButton} on:failedLogin={loginError} />
+<main class="background centered">
+	<Card seamless>
+		<Logo>
+			<img class="logo" src="/static/bobaBub.png" alt="Mascot of Food Tinder, Boba Bub" />
+			<h2>Food Tinder</h2>
+		</Logo>
 
-		<Buttons {...signUpButton} />
-		<!-- include error messages upon failed login -->
-		{#if loginErrorMsg !== ''}
-			<p class="error">Error: {loginErrorMsg}</p>
-		{/if}
-	</div>
+		<Fields>
+			<Error box msg={loginErrorMsg} />
+
+			<InputField placeholderText="Username" bind:value={username} />
+			<InputField placeholderText="Password" bind:value={password} password />
+			<Button suggested on:click={login} disabled={username == '' || password == ''}>Log In</Button>
+			<Button secondary href="/signup">Register</Button>
+		</Fields>
+	</Card>
 </main>
 
 <style>
-	main.background {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
+	img.logo {
+		width: 150px;
+		height: 150px;
 	}
 
-	.loginComponents {
-		display: flex;
-		flex-direction: column;
-		gap: 28px;
+	h2 {
+		color: var(--accent-foreground);
+		margin: 0;
 	}
 </style>

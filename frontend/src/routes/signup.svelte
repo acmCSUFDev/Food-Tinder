@@ -1,85 +1,46 @@
 <script>
-	import InputFieldComponent from '../lib/reusable/input-field.svelte';
-	import Buttons from '../lib/reusable/button.svelte';
-	import RegisterBox from '../lib/components/register-box.svelte';
+	import InputField from '../lib/reusable/input-field.svelte';
+	import Button from '../lib/reusable/button.svelte';
+	import Fields from '../lib/reusable/fields.svelte';
+	import Error from '../lib/reusable/error.svelte';
+	import Card from '../lib/reusable/card.svelte';
+	import Logo from '../lib/reusable/logo.svelte';
 
-	let signupInformation = {
-		username: '',
-		displayName: '',
-		password: '',
-		passVerify: ''
-	};
+	let username = '';
+	let password = '';
+	let passwordVerify = '';
+	let displayName = '';
+	let errorMsg = '';
 
-	let registerButton = {
-		btnType: 'signup2',
-		btnContent: 'Sign Up',
-		btnRoute: '/login'
-	};
+	function register() {}
 </script>
 
-<div class="background">
-	<div class="signUpComponents">
-		<div class="item-wrapper">
-			<div class="input">
-				<RegisterBox />
-				<InputFieldComponent placeholderText={'Username'} bind:value={signupInformation.username} />
-				<InputFieldComponent
-					placeholderText={'Display Name (optional)'}
-					bind:value={signupInformation.displayName}
-				/>
-				<InputFieldComponent placeholderText={'Password'} bind:value={signupInformation.password} />
-				<InputFieldComponent
-					placeholderText={'Verify Password'}
-					bind:value={signupInformation.passVerify}
-				/>
-			</div>
-			<Buttons {...registerButton} />
-		</div>
-	</div>
-</div>
+<main class="background centered">
+	<Card seamless>
+		<Logo>
+			<h2>Register</h2>
+		</Logo>
 
-<style>
-	.item-wrapper {
-		display: flex;
-		flex-direction: column;
-		gap: 5vh;
-	}
+		<Fields>
+			<Error box msg={errorMsg} />
 
-	.input {
-		display: flex;
-		flex-direction: column;
-		gap: 3vh;
-	}
-
-	.signUpComponents {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-	}
-
-	.background {
-		padding-top: 12vh;
-		box-sizing: border-box;
-		background: linear-gradient(
-			to bottom,
-			rgba(85, 205, 252, 1) 0%,
-			rgba(147, 194, 255, 1) 25%,
-			rgba(200, 181, 245, 1) 50%,
-			rgba(234, 171, 217, 1) 75%,
-			rgba(247, 168, 184, 1) 100%
-		);
-		height: 100vh;
-	}
-
-	@media (max-width: 3000px) {
-		.signUpComponents {
-			gap: 1vw;
-		}
-	}
-	@media (max-width: 900px) {
-		.signUpComponents {
-			gap: 6vw;
-		}
-	}
-</style>
+			<InputField placeholderText="Username" bind:value={username} />
+			<InputField placeholderText="Nickname (optional)" bind:value={displayName} />
+			<InputField placeholderText="Password" password bind:value={password} />
+			<InputField
+				placeholderText="Verify Password"
+				password
+				bind:value={passwordVerify}
+				error={passwordVerify != password}
+			/>
+			<Button
+				suggested
+				on:click={register}
+				disabled={username == '' || password == '' || passwordVerify != password}
+			>
+				Register
+			</Button>
+			<Button secondary href="/login">Back to Login</Button>
+		</Fields>
+	</Card>
+</main>
