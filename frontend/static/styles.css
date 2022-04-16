@@ -3,11 +3,14 @@
 :root {
 	--accent-background: #b78ae6;
 	--accent-foreground: #a855fc;
-}
+	--accent-border: #af6cf2;
 
-.error {
-	color: #ff0000;
-	font-weight: 700;
+	--error-foreground: rgba(255, 0, 51, 1);
+	--error-background: rgba(179, 0, 36, 0.25);
+
+	--border-radius: 25px;
+
+	--input-padding: 10px 15px;
 }
 
 main.background {
@@ -21,6 +24,13 @@ main.background {
 		rgba(85, 205, 252, 1) 100%
 	);
 	height: 100vh;
+}
+
+main.centered {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
 }
 
 body {

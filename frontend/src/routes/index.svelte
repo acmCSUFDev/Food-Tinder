@@ -1,31 +1,19 @@
-<main class="background">
-	<div class=""
-	<div class="spinner" />
-	<h3 class="loggingIn">Logging in</h3>
+<script>
+	import Loading from '$lib/components/loading.svelte';
+	import * as localStorage from '$lib/local-storage.js';
+	import * as svelte from 'svelte';
+	import * as api from '$lib/api';
+	import * as navigation from '$app/navigation';
+
+	svelte.onMount(() => {
+		let token = localStorage.get('token');
+		if (token) {
+			api.setAuthorization(localStorage.get('token'));
+			navigation.goto('/app');
+		}
+	});
+</script>
+
+<main class="background centered">
+	<Loading />
 </main>
-
-<style>
-	main {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-
-		padding: 12px;
-		background-color: rgba(255, 255, 255, 0.25);
-	}
-
-	.spinner {
-		--spinner-fore-color: var(--accent-foreground);
-		--spinner-back-color: rgba(255, 255, 255, 0.25);
-
-		width: 64px;
-		height: 64px;
-		border-width: 8px;
-	}
-
-	.loggingIn {
-		margin-top: 1em;
-		color: var(--accent-foreground);
-	}
-</style>
