@@ -3,9 +3,7 @@
 	export let value = '';
 </script>
 
-<div>
-	<input type="text" placeholder={placeholderText} bind:value />
-</div>
+<input type="text" placeholder={placeholderText} bind:value />
 
 <!-- <p>AHHHHHHHHHHH</p> -->
 <style>

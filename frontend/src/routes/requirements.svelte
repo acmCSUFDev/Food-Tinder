@@ -2,7 +2,7 @@
 	// import Buttons from '../resuable/button.svelte';
 </script>
 
-<div class="page">
+<main class="page">
 	<div class="wrapper">
 		<div class="btnContainer">
 			<h3>left</h3>
@@ -10,7 +10,7 @@
 		</div>
 		<h3>more info</h3>
 	</div>
-</div>
+</main>
 
 <style>
 	/* h3 {

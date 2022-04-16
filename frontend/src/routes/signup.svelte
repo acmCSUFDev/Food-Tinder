@@ -2,6 +2,9 @@
 	import InputFieldComponent from '../lib/reusable/input-field.svelte';
 	import Buttons from '../lib/reusable/button.svelte';
 	import RegisterBox from '../lib/components/register-box.svelte';
+	import * as api from '../lib/api';
+
+	let SignUpLoginMsg = '';
 
 	let signupInformation = {
 		username: '',
@@ -15,9 +18,22 @@
 		btnContent: 'Sign Up',
 		btnRoute: '/login'
 	};
+
+	// function register() {
+	// 	// switch to loading page
+	// 	api
+	// 		.register(signupInformation.username, signupInformation.password)
+	// 		.then((session) => {
+	// 			console.log(session);
+	// 		})
+	// 		.catch((err) => {
+	// 			// set err to component
+	// 			SignUpLoginMsg = api.errorMsg(err);
+	// 		});
+	// }
 </script>
 
-<div class="background">
+<main class="background">
 	<div class="signUpComponents">
 		<div class="item-wrapper">
 			<div class="input">
@@ -36,7 +52,7 @@
 			<Buttons {...registerButton} />
 		</div>
 	</div>
-</div>
+</main>
 
 <style>
 	.item-wrapper {

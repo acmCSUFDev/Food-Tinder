@@ -1,36 +1,24 @@
 <script>
-	import { createEventDispatcher } from 'svelte';
-
 	export let btnType = '';
 	export let btnContent = '';
 	export let btnRoute = '#';
 	export let loginInfo = '';
 	export let passInfo = '';
-
-	const dispatch = createEventDispatcher();
-
-	function failedLoginDispatch() {
-		if(loginInfo === '') {
-			dispatch('failedLogin', 'username cannot be left blank');
-		} else if (passInfo === '') {
-			dispatch('failedLogin', 'password cannot be left blank');
-		} else {
-			dispatch('failedLogin', 'username and password cannot be left blank');
-		}
-	}
+	export let onclick = function () {};
 </script>
-{#if (loginInfo !== '') && (passInfo !== '')}
-	<a href="{btnRoute}">
-		<button class="{btnType}">{btnContent}</button>
-	</a>
-{:else if (btnType === 'signup') || (btnType === 'signup2' )}
-<a href="{btnRoute}">
-	<button class="{btnType}">{btnContent}</button>
-</a>
-{:else}
-<button class="{btnType}" on:click={failedLoginDispatch}>{btnContent}</button>
-{/if}
 
+{#if loginInfo !== '' && passInfo !== ''}
+	<a href={btnRoute}>
+		<button class={btnType}>{btnContent}</button>
+	</a>
+{:else if btnType === 'signup' || btnType === 'signup2'}
+	<a href={btnRoute}>
+		<button class={btnType}>{btnContent}</button>
+	</a>
+{:else}
+	<!-- <button class={btnType} on:click={failedLoginDispatch}>{btnContent}</button> -->
+	<button class={btnType} on:click={onclick}>{btnContent}</button>
+{/if}
 
 <style>
 	a {
@@ -46,12 +34,11 @@
 		justify-content: center;
 		font-family: Arial, Helvetica, sans-serif;
 		font-size: 18px;
-		font-weight: 100;
 	}
 
 	.login {
 		color: white;
-		background-color: rgba(168, 85, 252, 0.57);
+		background-color: rgb(197, 140, 255);
 		border: rgba(168, 85, 252, 0.57) 1px solid;
 	}
 	.signup {

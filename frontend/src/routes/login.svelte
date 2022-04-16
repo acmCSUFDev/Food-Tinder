@@ -3,7 +3,7 @@
 	import Buttons from '../lib/reusable/button.svelte';
 
 	import Logo from '../lib/components/logo.svelte';
-	// import * as api from '../lib/api';
+	import * as api from '../lib/api';
 
 	let loginErrorMsg = '';
 
@@ -12,7 +12,10 @@
 		btnContent: 'Log In',
 		btnRoute: '/requirements',
 		loginInfo: '',
-		passInfo: ''
+		passInfo: '',
+		onclick: () => {
+			login();
+		}
 	};
 	let signUpButton = {
 		btnType: 'signup',
@@ -24,10 +27,18 @@
 		loginErrorMsg = e.detail;
 	}
 
-	// function onMount(async () => {
-	//  	const a = await api.login('joe', 'mama');
-	//  	console.log(a);
-	//  });
+	function login() {
+		// switch to loading page
+		api
+			.login(logInButton.loginInfo, logInButton.passInfo)
+			.then((session) => {
+				console.log(session);
+			})
+			.catch((err) => {
+				// set err to component
+				loginErrorMsg = api.errorMsg(err);
+			});
+	}
 </script>
 
 <main class="background">
