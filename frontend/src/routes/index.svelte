@@ -1,11 +1,11 @@
 <script>
 	import Loading from '$lib/components/loading.svelte';
 	import * as localStorage from '$lib/local-storage.js';
-	import * as svelte from 'svelte';
+	import  { onMount } from 'svelte';
 	import * as api from '$lib/api';
 	import * as navigation from '$app/navigation';
 
-	svelte.onMount(() => {
+	onMount(() => {
 		let token = localStorage.get('token');
 		if (token) {
 			api.setAuthorization(localStorage.get('token'));
