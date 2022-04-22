@@ -27,7 +27,7 @@ let goapi-gen = pkgs.buildGoModule {
 				(pr "discord-gophers" 85)
 			];
 
-		vendorSha256 = "1aq24cx5qirgzjcahzqjkzc50687xj2vqz623f56q5j5m2x8cj73";
+		vendorSha256 = "1dknfg3w97421c8dnld5kvx0psicvmxr7wzkhqipaxplcg3cqrr9";
 	};
 
 	sqlc = pkgs.buildGoModule {
@@ -42,7 +42,7 @@ let goapi-gen = pkgs.buildGoModule {
 		};
 
 		proxyVendor = true;
-		vendorSha256 = "1qr8nymhcwmqj3b8f50fknl2rbnrnvfl0yj5vfs0l1jd0r4rz2d0";
+		vendorSha256 = "0fh6y93nwzk16sf9dnc0iqpvjh86mv2ypa7cv7gaz0jrs1didw68";
 	};
 
 	moq = pkgs.buildGoModule {
@@ -78,8 +78,8 @@ let goapi-gen = pkgs.buildGoModule {
 	nixos-shell = pkgs.callPackage (pkgs.fetchFromGitHub {
 		owner  = "diamondburned";
 		repo   = "nixos-shell";
-		rev    = "1c2cf850c3c4c68fa8f18850b231c5a365a500d6";
-		sha256 = "1ah05pzn1pcwr5zbqprxlva42b57na9p6m4d93zin2m2bdcrjy53";
+		rev    = "e238cb522f7168fbc997101d00e6e2cc0d3e2ff9";
+		sha256 = "02wqbfmc0c7q3896x6k2hxwcf1x202qfw0almb6rchlh7cqkva0w";
 	}) {};
 
 in pkgs.mkShell {
