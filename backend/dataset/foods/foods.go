@@ -9,7 +9,7 @@ import (
 	_ "embed"
 )
 
-//go:generate go run ./cmd/update-food-list -o foods.json
+//go:generate go run github.com/acmCSUFDev/Food-Tinder/backend/cmd/update-food-list -o foods.json
 
 //go:embed foods.json
 var JSON []byte

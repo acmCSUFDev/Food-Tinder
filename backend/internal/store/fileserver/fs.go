@@ -3,11 +3,16 @@ package fileserver
 import (
 	"crypto/sha256"
 	"encoding/base64"
+	"image"
 	"io"
 	"io/fs"
 	"os"
 
+	_ "image/jpeg"
+	_ "image/png"
+
 	"github.com/acmCSUFDev/Food-Tinder/backend/foodtinder"
+	"github.com/bbrks/go-blurhash"
 	"github.com/pkg/errors"
 )
 
@@ -47,4 +52,23 @@ func (s diskAssets) Create(_ *foodtinder.Session, r io.Reader) (string, error) {
 	}
 
 	return name, nil
+}
+
+// Blurhash creates the blur hash of the image asset with the given name. If the
+// hash cannot be created for whatever reason, then an empty string is returned.
+// The error may also be nil.
+func Blurhash(fs foodtinder.FileServer, name string) (string, error) {
+	f, err := fs.Open(name)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+
+	img, _, err := image.Decode(f)
+	if err != nil {
+		return "", nil
+	}
+
+	hash, _ := blurhash.Encode(5, 5, img)
+	return hash, nil
 }

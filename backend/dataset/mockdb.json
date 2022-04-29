@@ -18,7 +18,10 @@
     {
       "ID": "292795750931234816",
       "Username": "food_tinder_user",
-      "Images": [],
+      "CoverHash": "eNLXJS0L^*_2?bNKR.Rlxuoz%M-o-;M_NGt8a{M{t7s:xC%gIUE1kW",
+      "Images": [
+        "1"
+      ],
       "Description": "some kind of tuna mayo onigiri",
       "Tags": [
         "Rice",
@@ -28,9 +31,12 @@
       "Location": "Fullerton, CA"
     },
     {
-      "ID": "292795750931234816",
+      "ID": "292795750931234817",
       "Username": "food_tinder_user",
-      "Images": [],
+      "CoverHash": "eTO.mZtmx^xtNK%$t8Rlaxs,.Ttmo~kCt7xuoyoIV@NGyYV]WFens,",
+      "Images": [
+        "2"
+      ],
       "Description": "some pizza dish from Pieology",
       "Tags": [
         "Pizza",
@@ -48,5 +54,9 @@
         "UserAgent": "curl/7.80.0"
       }
     }
+  ],
+  "AssetURLs": [
+    "https://fusedbyfionauyema.com/wp-content/uploads/2021/02/Fused-by-Fiona-Uyema-how-to-make-onigiri-with-tuna-mayo-500x375.jpg",
+    "https://www.chewboom.com/wp-content/uploads/2021/08/Pieology-Introduces-New-BBQ-Luau-Pizza.jpg"
   ]
 }

@@ -13,6 +13,7 @@ import (
 
 	"github.com/acmCSUFDev/Food-Tinder/backend/foodtinder"
 	"github.com/acmCSUFDev/Food-Tinder/backend/internal/api/oapi"
+	"github.com/acmCSUFDev/Food-Tinder/backend/internal/store/fileserver"
 	"github.com/discord-gophers/goapi-gen/pkg/types"
 	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/go-chi/chi/v5"
@@ -261,9 +262,16 @@ func (h handler) CreatePost(w http.ResponseWriter, r *http.Request) *oapi.Respon
 		return oapi.CreatePostJSON500Response(oapi.RespErr(err))
 	}
 
-	// TODO: CoverHash.
+	var coverHash string
+	if len(body.Images) > 0 {
+		coverHash, err = fileserver.Blurhash(h.Server.FileServer(), body.Images[0])
+		if err != nil {
+			return oapi.CreatePostJSON500Response(oapi.RespErr(err))
+		}
+	}
 
 	post := foodtinder.Post{
+		CoverHash:   coverHash,
 		Images:      body.Images,
 		Description: body.Description,
 		Tags:        body.Tags,

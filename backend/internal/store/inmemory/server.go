@@ -3,6 +3,7 @@ package inmemory
 
 import (
 	"log"
+	"net/http"
 	"sort"
 	"sync"
 
@@ -35,9 +36,10 @@ type Session struct {
 
 // State describes the initial state of the memory store.
 type State struct {
-	Users    []User
-	Posts    []foodtinder.Post
-	Sessions []foodtinder.Session
+	Users     []User
+	Posts     []foodtinder.Post
+	Sessions  []foodtinder.Session
+	AssetURLs []string
 }
 
 func (s *State) sortPosts() {
@@ -64,6 +66,28 @@ func NewServer(state State, fserver foodtinder.FileServer) foodtinder.Server {
 	sessions := make(map[string]*foodtinder.Session)
 	for i, session := range state.Sessions {
 		sessions[session.Token] = &state.Sessions[i]
+	}
+
+	if len(state.AssetURLs) > 0 {
+		for _, url := range state.AssetURLs {
+			go func(url string) {
+				r, err := http.Get(url)
+				if err != nil {
+					log.Println("cannot GET asset", url)
+					return
+				}
+
+				defer r.Body.Close()
+
+				v, err := fserver.Create(nil, r.Body)
+				if err != nil {
+					log.Println("cannot download asset", url)
+					return
+				}
+
+				log.Println("registered asset", v)
+			}(url)
+		}
 	}
 
 	return &server{

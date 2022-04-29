@@ -22,6 +22,7 @@ require (
 )
 
 require (
+	github.com/bbrks/go-blurhash v1.1.1 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-chi/cors v1.2.0 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
