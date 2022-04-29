@@ -12,8 +12,8 @@
     "generate": "oazapfts --optimistic ../openapi/foodtinder.jsonc src/lib/api/openapi.ts"
   },
   "devDependencies": {
-    "@sveltejs/adapter-auto": "next",
-    "@sveltejs/kit": "next",
+    "@sveltejs/adapter-static": "^1.0.0-next.29",
+    "@sveltejs/kit": "^1.0.0-next.320",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-svelte3": "^3.2.1",
@@ -25,6 +25,5 @@
     "svelte-language-server": "^0.14.26"
   },
   "type": "module",
-  "dependencies": {
-  }
+  "dependencies": {}
 }
