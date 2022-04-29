@@ -18,6 +18,12 @@ go run .
 within the `./backend` (this) directory. If not, point `DB_ADDRESS` to the right
 `./dataset/mockdb.json`.
 
+By default, the process listens to http://localhost:3001. To change this, see
+`.env`.
+
+If `mockdb.json` is used, then the example login credentials are
+`food_tinder_user:password`.
+
 ## Developing
 
 It is recommended to develop the backend inside the supplied
