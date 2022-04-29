@@ -11,7 +11,7 @@ export function hasAuthorized() {
 
 // setAuthorization sets the API's authorization header.
 export function setAuthorization(auth: string) {
-	api.defaults.headers.authorization = "Bearer " + auth;
+	api.defaults.headers.authorization = auth;
 }
 
 export function errorMsg(err) {

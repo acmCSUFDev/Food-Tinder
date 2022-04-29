@@ -18,13 +18,12 @@
 
 	function login() {
 		loading = true;
-		console.log('login()');
 
 		api
 			.login(username, password)
 			.then((session) => {
 				loading = false;
-				globals.token.set(session.token);
+				globals.token.set('Bearer ' + session.token);
 				navigation.goto('/app');
 			})
 			.catch((err) => {
