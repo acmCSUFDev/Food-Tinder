@@ -2,9 +2,11 @@
 package inmemory
 
 import (
+	"io"
 	"log"
 	"net/http"
 	"sort"
+	"strconv"
 	"sync"
 
 	"github.com/acmCSUFDev/Food-Tinder/backend/foodtinder"
@@ -56,11 +58,7 @@ type server struct {
 }
 
 // NewServer creates a new on-memory data server using the given store.
-func NewServer(state State, fserver foodtinder.FileServer) foodtinder.Server {
-	if fserver == nil {
-		fserver = fileserver.InMemory(nil)
-	}
-
+func NewServer(state State) foodtinder.Server {
 	state.sortPosts()
 
 	sessions := make(map[string]*foodtinder.Session)
@@ -68,33 +66,51 @@ func NewServer(state State, fserver foodtinder.FileServer) foodtinder.Server {
 		sessions[session.Token] = &state.Sessions[i]
 	}
 
-	if len(state.AssetURLs) > 0 {
-		for _, url := range state.AssetURLs {
-			go func(url string) {
-				r, err := http.Get(url)
-				if err != nil {
-					log.Println("cannot GET asset", url)
-					return
-				}
-
-				defer r.Body.Close()
-
-				v, err := fserver.Create(nil, r.Body)
-				if err != nil {
-					log.Println("cannot download asset", url)
-					return
-				}
-
-				log.Println("registered asset", v)
-			}(url)
-		}
-	}
-
 	return &server{
 		store:    state,
 		sessions: sessions,
-		fserver:  fserver,
+		fserver:  fileserver.InMemory(fetchAssetURLs(state.AssetURLs)),
 	}
+}
+
+func fetchAssetURLs(urls []string) map[string][]byte {
+	if len(urls) == 0 {
+		return nil
+	}
+
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+	assets := make(map[string][]byte, len(urls))
+
+	for i, url := range urls {
+		wg.Add(1)
+		go func(i int, url string) {
+			defer wg.Done()
+
+			r, err := http.Get(url)
+			if err != nil {
+				log.Println("cannot GET asset", url)
+				return
+			}
+
+			defer r.Body.Close()
+
+			b, err := io.ReadAll(r.Body)
+			if err != nil {
+				log.Println("cannot download asset", url)
+				return
+			}
+
+			mu.Lock()
+			assets[strconv.Itoa(i+1)] = b
+			mu.Unlock()
+
+			log.Println("registered asset", i)
+		}(i, url)
+	}
+
+	wg.Wait()
+	return assets
 }
 
 func (s *server) FileServer() foodtinder.FileServer {

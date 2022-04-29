@@ -24,6 +24,7 @@ type Server interface {
 // Opts contains optional options for the store backend.
 type Opts struct {
 	// FileServer is the file server to use. If nil, file.InMemory will be used.
+	// This option is useless for inmemory (mock).
 	FileServer foodtinder.FileServer
 }
 
@@ -52,7 +53,7 @@ func Open(uri string, opts Opts) (Server, error) {
 			}
 		}
 
-		s := inmemory.NewServer(state, opts.FileServer)
+		s := inmemory.NewServer(state)
 		return NopCloser(s), nil
 
 	case "postgres":

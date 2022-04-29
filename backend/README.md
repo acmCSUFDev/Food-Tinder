@@ -22,7 +22,7 @@ By default, the process listens to http://localhost:3001. To change this, see
 `.env`.
 
 If `mockdb.json` is used, then the example login credentials are
-`food_tinder_user:password`.
+`fortinayt:password`.
 
 ## Developing
 
