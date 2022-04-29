@@ -165,6 +165,13 @@ func (h handler) Register(w http.ResponseWriter, r *http.Request, params oapi.Re
 	})
 }
 
+func (h handler) ListFoods(w http.ResponseWriter, r *http.Request) *oapi.Response {
+	foods := foodtinder.ListFoods()
+	return oapi.ListFoodsJSON200Response(oapi.FoodCategories{
+		AdditionalProperties: foods,
+	})
+}
+
 func (h handler) GetSelf(w http.ResponseWriter, r *http.Request) *oapi.Response {
 	asrv := h.Server.AuthorizedServer(sessionFromContext(r.Context()))
 	usrv := asrv.UserServer()

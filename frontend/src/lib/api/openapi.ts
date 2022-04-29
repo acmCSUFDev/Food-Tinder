@@ -28,6 +28,9 @@ export type Error = {
 export type FormError = Error & {
     form_id?: string;
 };
+export type FoodCategories = {
+    [key: string]: string[];
+};
 export type User = {
     username: string;
     display_name?: string;
@@ -36,9 +39,7 @@ export type User = {
 };
 export type FoodPreferences = {
     likes: string[];
-    prefers: {
-        [key: string]: string[];
-    };
+    prefers: FoodCategories;
 };
 export type Self = User & FoodPreferences & {
     birthday?: string;
@@ -93,6 +94,20 @@ export function register(username: string, password: string, opts?: Oazapfts.Req
     }))}`, {
         ...opts,
         method: "POST"
+    }));
+}
+/**
+ * Get the list of all valid food categories and names.
+ */
+export function listFoods(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.ok(oazapfts.fetchJson<{
+        status: 200;
+        data: FoodCategories;
+    } | {
+        status: 500;
+        data: Error;
+    }>("/food/list", {
+        ...opts
     }));
 }
 /**

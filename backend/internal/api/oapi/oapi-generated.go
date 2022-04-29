@@ -34,15 +34,15 @@ type Error struct {
 	Message string `json:"message"`
 }
 
-// FoodPreferences defines model for FoodPreferences.
-type FoodPreferences struct {
-	Likes   []string                `json:"likes"`
-	Prefers FoodPreferences_Prefers `json:"prefers"`
+// FoodCategories defines model for FoodCategories.
+type FoodCategories struct {
+	AdditionalProperties map[string][]string `json:"-"`
 }
 
-// FoodPreferences_Prefers defines model for FoodPreferences.Prefers.
-type FoodPreferences_Prefers struct {
-	AdditionalProperties map[string][]string `json:"-"`
+// FoodPreferences defines model for FoodPreferences.
+type FoodPreferences struct {
+	Likes   []string       `json:"likes"`
+	Prefers FoodCategories `json:"prefers"`
 }
 
 // FormError defines model for FormError.
@@ -236,6 +236,26 @@ func GetAssetJSON404Response(body FormError) *Response {
 // GetAssetJSON500Response is a constructor method for a GetAsset response.
 // A *Response is returned with the configured status code and content type from the spec.
 func GetAssetJSON500Response(body Error) *Response {
+	return &Response{
+		body:        body,
+		statusCode:  500,
+		contentType: "application/json",
+	}
+}
+
+// ListFoodsJSON200Response is a constructor method for a ListFoods response.
+// A *Response is returned with the configured status code and content type from the spec.
+func ListFoodsJSON200Response(body FoodCategories) *Response {
+	return &Response{
+		body:        body,
+		statusCode:  200,
+		contentType: "application/json",
+	}
+}
+
+// ListFoodsJSON500Response is a constructor method for a ListFoods response.
+// A *Response is returned with the configured status code and content type from the spec.
+func ListFoodsJSON500Response(body Error) *Response {
 	return &Response{
 		body:        body,
 		statusCode:  500,
@@ -463,25 +483,25 @@ func GetUserJSON500Response(body Error) *Response {
 	}
 }
 
-// Getter for additional properties for FoodPreferences_Prefers. Returns the specified
+// Getter for additional properties for FoodCategories. Returns the specified
 // element and whether it was found
-func (a FoodPreferences_Prefers) Get(fieldName string) (value []string, found bool) {
+func (a FoodCategories) Get(fieldName string) (value []string, found bool) {
 	if a.AdditionalProperties != nil {
 		value, found = a.AdditionalProperties[fieldName]
 	}
 	return
 }
 
-// Setter for additional properties for FoodPreferences_Prefers
-func (a *FoodPreferences_Prefers) Set(fieldName string, value []string) {
+// Setter for additional properties for FoodCategories
+func (a *FoodCategories) Set(fieldName string, value []string) {
 	if a.AdditionalProperties == nil {
 		a.AdditionalProperties = make(map[string][]string)
 	}
 	a.AdditionalProperties[fieldName] = value
 }
 
-// Override default JSON handling for FoodPreferences_Prefers to handle AdditionalProperties
-func (a *FoodPreferences_Prefers) UnmarshalJSON(b []byte) error {
+// Override default JSON handling for FoodCategories to handle AdditionalProperties
+func (a *FoodCategories) UnmarshalJSON(b []byte) error {
 	object := make(map[string]json.RawMessage)
 	err := json.Unmarshal(b, &object)
 	if err != nil {
@@ -502,8 +522,8 @@ func (a *FoodPreferences_Prefers) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// Override default JSON handling for FoodPreferences_Prefers to handle AdditionalProperties
-func (a FoodPreferences_Prefers) MarshalJSON() ([]byte, error) {
+// Override default JSON handling for FoodCategories to handle AdditionalProperties
+func (a FoodCategories) MarshalJSON() ([]byte, error) {
 	var err error
 	object := make(map[string]json.RawMessage)
 
@@ -524,6 +544,9 @@ type ServerInterface interface {
 	// Get the file asset by the given ID. Note that assets are not separated by type; the user must assume the type from the context that the asset ID is from.
 	// (GET /assets/{id})
 	GetAsset(w http.ResponseWriter, r *http.Request, id string) *Response
+	// Get the list of all valid food categories and names.
+	// (GET /food/list)
+	ListFoods(w http.ResponseWriter, r *http.Request) *Response
 	// Log in using username and password. A 401 is returned if the information is incorrect.
 	// (POST /login)
 	Login(w http.ResponseWriter, r *http.Request, params LoginParams) *Response
@@ -587,6 +610,20 @@ func (siw *ServerInterfaceWrapper) GetAsset(w http.ResponseWriter, r *http.Reque
 
 	var handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		resp := siw.Handler.GetAsset(w, r, id)
+		if resp != nil {
+			render.Render(w, r, resp)
+		}
+	})
+
+	handler(w, r.WithContext(ctx))
+}
+
+// ListFoods operation middleware
+func (siw *ServerInterfaceWrapper) ListFoods(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resp := siw.Handler.ListFoods(w, r)
 		if resp != nil {
 			render.Render(w, r, resp)
 		}
@@ -899,6 +936,7 @@ func Handler(si ServerInterface, opts ...ServerOption) http.Handler {
 	r.Route(options.BaseURL, func(r chi.Router) {
 		r.Post("/assets", wrapper.UploadAsset)
 		r.Get("/assets/{id}", wrapper.GetAsset)
+		r.Get("/food/list", wrapper.ListFoods)
 		r.Post("/login", wrapper.Login)
 		r.Get("/posts", wrapper.GetNextPosts)
 		r.Post("/posts", wrapper.CreatePost)
@@ -945,41 +983,42 @@ func WithErrorHandler(handler func(w http.ResponseWriter, r *http.Request, err e
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

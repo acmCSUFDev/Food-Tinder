@@ -103,6 +103,23 @@
         }
       }
     },
+    "/food/list": {
+      "get": {
+        "summary": "Get the list of all valid food categories and names.",
+        "operationId": "listFoods",
+        "security": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/FoodCategories" }
+              }
+            }
+          },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
     "/users/@self": {
       "get": {
         "summary": "Get the current user",
@@ -468,19 +485,20 @@
             },
             "example": ["Rice", "Fish"]
           },
-          "prefers": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "example": {
-              "Rice": ["Sushi Rice"],
-              "Fish": ["Ahi Tuna", "Salmon"]
-            }
+          "prefers": { "$ref": "#/components/schemas/FoodCategories" }
+        }
+      },
+      "FoodCategories": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "array",
+          "items": {
+            "type": "string"
           }
+        },
+        "example": {
+          "Rice": ["Sushi Rice"],
+          "Fish": ["Ahi Tuna", "Salmon"]
         }
       },
       "UserLikedPosts": {

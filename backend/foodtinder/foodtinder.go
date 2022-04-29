@@ -207,6 +207,16 @@ type FoodPreferences struct {
 	Prefers map[foods.Category][]foods.Name
 }
 
+// ListFoods lists all valid food preferences.
+func ListFoods() map[foods.Category][]foods.Name {
+	cats := foods.Unmarshal()
+	list := make(map[foods.Category][]foods.Name, len(cats))
+	for cat, names := range cats {
+		list[cat] = names
+	}
+	return list
+}
+
 // UserLikedPosts holds the list of foods that the user liked.
 type UserLikedPosts struct {
 	// Posts maps post IDs to the time that the user liked.
