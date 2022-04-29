@@ -3,6 +3,7 @@
 	export let secondary = false;
 	export let disabled = false;
 	export let href = '';
+	export let onclick = () => {};
 </script>
 
 {#if href}
@@ -10,7 +11,7 @@
 		<slot />
 	</a>
 {:else}
-	<button class:suggested class:secondary class:disabled>
+	<button class:suggested class:secondary class:disabled on:click={onclick}>
 		<slot />
 	</button>
 {/if}
