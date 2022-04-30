@@ -2,6 +2,7 @@
 	import * as svelte from 'svelte';
 	import * as api from '$lib/api';
 	import Loading from '$lib/components/loading.svelte';
+	import NavbarThing from '../../lib/components/nav.svelte';
 
 	const fallbackAvatar = 'https://fonts.gstatic.com/s/i/materialiconsoutlined/face/v15/24px.svg';
 
@@ -48,6 +49,7 @@
 </script>
 
 <main class="background">
+	<NavbarThing />
 	{#if loading}
 		<Loading />
 	{:else}
@@ -117,7 +119,7 @@
 
 		/* Use padding to make it appear like the whole card shifts up, not like
 		 * it's in a bounded box. */
-		padding-top: calc(50vh - (600px / 2));
+		padding-top: calc(50vh - (500px / 2));
 		padding-bottom: 25px;
 
 		/* Workaround for shadows not working due to overflow-y: auto. */
@@ -148,7 +150,7 @@
 
 	.post-content > img.post-cover {
 		object-fit: cover;
-		height: 600px;
+		height: 500px;
 		width: 100%;
 	}
 
