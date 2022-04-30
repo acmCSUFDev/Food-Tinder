@@ -10,12 +10,16 @@
 <style>
 	.spin-logo {
 		position: relative;
+		width: 100%;
+		height: 100%;
+
+		display: flex;
+		justify-content: center;
+		align-items: center;
 	}
 
 	.spin-logo * {
 		position: absolute;
-		top: 0;
-		left: 0;
 	}
 
 	.spin-logo :global(.spinner) {

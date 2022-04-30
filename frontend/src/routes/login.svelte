@@ -10,8 +10,8 @@
 	import * as globals from '$lib/globals';
 	import * as navigation from '$app/navigation';
 	import { onMount } from 'svelte';
+	import { error } from '$lib/globals';
 
-	let loginErrorMsg = '';
 	let username = '';
 	let password = '';
 	let loading = true;
@@ -29,7 +29,7 @@
 			.catch((err) => {
 				loading = false;
 				console.error(err);
-				loginErrorMsg = api.errorMsg(err);
+				globals.error.set(api.errorMsg(err));
 			});
 	}
 
@@ -49,7 +49,7 @@
 			</Logo>
 
 			<Fields>
-				<Error box msg={loginErrorMsg} />
+				<Error box msg={$error} />
 
 				<InputField placeholderText="Username" bind:value={username} />
 				<InputField placeholderText="Password" bind:value={password} password />

@@ -152,7 +152,9 @@ export function getNextPosts({ prevId }: {
 } = {}, opts?: Oazapfts.RequestOpts) {
     return oazapfts.ok(oazapfts.fetchJson<{
         status: 200;
-        data: Post[];
+        data: (Post & {
+            liked: boolean;
+        })[];
     } | {
         status: 400;
         data: FormError;
@@ -211,8 +213,17 @@ export function getLikedPosts(opts?: Oazapfts.RequestOpts) {
     } | {
         status: 500;
         data: Error;
-    }>("/posts/liked", {
+    }>("/posts/like", {
         ...opts
+    }));
+}
+/**
+ * Like the post
+ */
+export function postPostsLike(opts?: Oazapfts.RequestOpts) {
+    return oazapfts.ok(oazapfts.fetchText("/posts/like", {
+        ...opts,
+        method: "POST"
     }));
 }
 /**
