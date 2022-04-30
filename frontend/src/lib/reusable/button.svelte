@@ -1,13 +1,14 @@
 <script>
 	export let suggested = false;
 	export let secondary = false;
+	export let ternary = false;
 	export let disabled = false;
 	export let href = '';
 	export let onclick = () => {};
 </script>
 
 {#if href}
-	<a class:suggested class:secondary class:disabled {href} role="button">
+	<a class:suggested class:secondary class:ternary class:disabled {href} role="button">
 		<slot />
 	</a>
 {:else}
@@ -46,6 +47,15 @@
 	*.secondary:hover {
 		border-color: var(--accent-foreground);
 		background-color: rgba(255, 255, 255, 0.85);
+	}
+
+	*.ternary {
+		background-color: #1d1d1d;
+		transition: all 300ms;
+	}
+
+	*.ternary:hover {
+		background-color: var(--accent-foreground);
 	}
 
 	*.suggested {
