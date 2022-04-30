@@ -1,6 +1,6 @@
 { pkgs ? import <nixpkgs> {} }:
 
-let goapi-gen = pkgs.buildGoModule {
+let	goapi-gen = pkgs.buildGoModule {
 		name = "goapi-gen";
 		version = "081d60b";
 
@@ -88,7 +88,8 @@ let goapi-gen = pkgs.buildGoModule {
 
 in pkgs.mkShell {
 	buildInputs = with pkgs; [
-		go_1_17
+		go_1_18
+		gopls
 		goapi-gen
 		goose
 		sqlc

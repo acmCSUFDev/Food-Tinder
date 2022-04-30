@@ -131,6 +131,76 @@ func (q *Queries) DeleteSession(ctx context.Context, token string) error {
 	return err
 }
 
+const getPost = `-- name: GetPost :one
+SELECT
+    posts.id, posts.username, posts.cover_hash, posts.images, posts.description, posts.tags, posts.location,
+    count_likes (posts.id) AS likes,
+    (
+        SELECT
+            COUNT(*)
+        FROM
+            liked_posts
+        WHERE
+            liked_posts.post_id = posts.id
+            AND liked_posts.username = $2) AS liked
+FROM
+    posts
+WHERE
+    posts.id = $1
+LIMIT 1
+`
+
+type GetPostParams struct {
+	ID       int64
+	Username string
+}
+
+type GetPostRow struct {
+	ID          int64
+	Username    string
+	CoverHash   sql.NullString
+	Images      []string
+	Description sql.NullString
+	Tags        []string
+	Location    sql.NullString
+	Likes       int64
+	Liked       int64
+}
+
+// GetPost gets a single post.
+func (q *Queries) GetPost(ctx context.Context, arg GetPostParams) (GetPostRow, error) {
+	row := q.db.QueryRowContext(ctx, getPost, arg.ID, arg.Username)
+	var i GetPostRow
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.CoverHash,
+		pq.Array(&i.Images),
+		&i.Description,
+		pq.Array(&i.Tags),
+		&i.Location,
+		&i.Likes,
+		&i.Liked,
+	)
+	return i, err
+}
+
+const likePost = `-- name: LikePost :exec
+INSERT INTO liked_posts (post_id, username, liked_at)
+    VALUES ($1, $2, now())
+`
+
+type LikePostParams struct {
+	PostID   int64
+	Username string
+}
+
+// LikePost likes a post.
+func (q *Queries) LikePost(ctx context.Context, arg LikePostParams) error {
+	_, err := q.db.ExecContext(ctx, likePost, arg.PostID, arg.Username)
+	return err
+}
+
 const likedPosts = `-- name: LikedPosts :many
 SELECT
     posts.id, posts.username, posts.cover_hash, posts.images, posts.description, posts.tags, posts.location,
@@ -194,14 +264,29 @@ func (q *Queries) LikedPosts(ctx context.Context, username string) ([]LikedPosts
 const nextPosts = `-- name: NextPosts :many
 SELECT
     posts.id, posts.username, posts.cover_hash, posts.images, posts.description, posts.tags, posts.location,
-    count_likes (posts.id) AS likes
+    count_likes (posts.id) AS likes,
+    (
+        SELECT
+            COUNT(*)
+        FROM
+            liked_posts
+        WHERE
+            liked_posts.post_id = posts.id
+            AND liked_posts.username = $2) AS liked
 FROM
     posts
 WHERE
-    id < $1
+    posts.id < $1
     OR $1 = 0
+ORDER BY
+    posts.id DESC
 LIMIT 10
 `
+
+type NextPostsParams struct {
+	ID       int64
+	Username string
+}
 
 type NextPostsRow struct {
 	ID          int64
@@ -212,11 +297,12 @@ type NextPostsRow struct {
 	Tags        []string
 	Location    sql.NullString
 	Likes       int64
+	Liked       int64
 }
 
 // NextPosts paginates the list of posts.
-func (q *Queries) NextPosts(ctx context.Context, id int64) ([]NextPostsRow, error) {
-	rows, err := q.db.QueryContext(ctx, nextPosts, id)
+func (q *Queries) NextPosts(ctx context.Context, arg NextPostsParams) ([]NextPostsRow, error) {
+	rows, err := q.db.QueryContext(ctx, nextPosts, arg.ID, arg.Username)
 	if err != nil {
 		return nil, err
 	}
@@ -233,6 +319,7 @@ func (q *Queries) NextPosts(ctx context.Context, id int64) ([]NextPostsRow, erro
 			pq.Array(&i.Tags),
 			&i.Location,
 			&i.Likes,
+			&i.Liked,
 		); err != nil {
 			return nil, err
 		}
@@ -304,6 +391,23 @@ func (q *Queries) TokenExists(ctx context.Context, token string) (int64, error) 
 	var count int64
 	err := row.Scan(&count)
 	return count, err
+}
+
+const unlikePost = `-- name: UnlikePost :exec
+DELETE FROM liked_posts
+WHERE post_id = $1
+    AND username = $2
+`
+
+type UnlikePostParams struct {
+	PostID   int64
+	Username string
+}
+
+// UnlikePost removes a like of the current user from a post.
+func (q *Queries) UnlikePost(ctx context.Context, arg UnlikePostParams) error {
+	_, err := q.db.ExecContext(ctx, unlikePost, arg.PostID, arg.Username)
+	return err
 }
 
 const updateUser = `-- name: UpdateUser :exec

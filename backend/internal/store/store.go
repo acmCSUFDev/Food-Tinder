@@ -9,10 +9,11 @@ import (
 	"strings"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
-	"github.com/pkg/errors"
 
 	"github.com/acmCSUFDev/Food-Tinder/backend/foodtinder"
 	"github.com/acmCSUFDev/Food-Tinder/backend/internal/store/inmemory"
+	"github.com/acmCSUFDev/Food-Tinder/backend/internal/store/sql/postgres"
+	"github.com/pkg/errors"
 )
 
 type Server interface {
@@ -56,8 +57,7 @@ func Open(uri string, opts Opts) (Server, error) {
 		return NopCloser(s), nil
 
 	case "postgres":
-		// return postgres.New(url, opts.FileServer)
-		fallthrough // LOL DED
+		return postgres.New(url, opts.FileServer)
 
 	default:
 		return nil, fmt.Errorf("unknown SQL scheme %q", url.Scheme)

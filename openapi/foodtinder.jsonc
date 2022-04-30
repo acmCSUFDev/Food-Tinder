@@ -222,6 +222,30 @@
       }
     },
     "/posts/{id}": {
+      "get": {
+        "summary": "Get the post with the given ID.",
+        "operationId": "getPost",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The post ID to delete.",
+            "required": true,
+            "schema": { "$ref": "#/components/schemas/ID" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PostListing" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFoundError" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      },
       "delete": {
         "summary": "Delete the current user's posts by ID. A 401 is returned if the user tries to delete someone else's post.",
         "operationId": "deletePost",
@@ -238,6 +262,44 @@
           "200": {
             "description": "All posts successfully deleted."
           },
+          "404": { "$ref": "#/components/responses/NotFoundError" },
+          "500": { "$ref": "#/components/responses/ServerError" }
+        }
+      }
+    },
+    "/posts/{id}/like": {
+      "post": {
+        "summary": "Like or unlike the post",
+        "operationId": "likePost",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The post ID to delete.",
+            "required": true,
+            "schema": { "$ref": "#/components/schemas/ID" }
+          }
+        ],
+        "requestBody": {
+          "description": "The data to set whether or not the post is liked.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "like": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Post liked or unliked successfully."
+          },
+          "400": { "$ref": "#/components/responses/UserError" },
           "404": { "$ref": "#/components/responses/NotFoundError" },
           "500": { "$ref": "#/components/responses/ServerError" }
         }
@@ -260,9 +322,6 @@
           },
           "500": { "$ref": "#/components/responses/ServerError" }
         }
-      },
-      "post": {
-        "summary": "Like the post"
       }
     },
     "/assets": {
@@ -534,7 +593,14 @@
         }
       },
       "Post": {
-        "required": ["id", "username", "images", "description", "tags"],
+        "required": [
+          "id",
+          "username",
+          "images",
+          "description",
+          "tags",
+          "likes"
+        ],
         "x-go-optional-value": true,
         "properties": {
           "id": {
@@ -570,6 +636,11 @@
             "type": "string",
             "description": "Location is the location where the post was made.",
             "example": "Fullerton, CA"
+          },
+          "likes": {
+            "type": "integer",
+            "description": "Likes is the number of likes of this post.",
+            "example": 10
           }
         }
       },

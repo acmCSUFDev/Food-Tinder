@@ -87,16 +87,45 @@ WHERE
 DELETE FROM sessions
 WHERE token = $1;
 
+-- GetPost gets a single post.
+-- name: GetPost :one
+SELECT
+    posts.*,
+    count_likes (posts.id) AS likes,
+    (
+        SELECT
+            COUNT(*)
+        FROM
+            liked_posts
+        WHERE
+            liked_posts.post_id = posts.id
+            AND liked_posts.username = $2) AS liked
+FROM
+    posts
+WHERE
+    posts.id = $1
+LIMIT 1;
+
 -- NextPosts paginates the list of posts.
 -- name: NextPosts :many
 SELECT
     posts.*,
-    count_likes (posts.id) AS likes
+    count_likes (posts.id) AS likes,
+    (
+        SELECT
+            COUNT(*)
+        FROM
+            liked_posts
+        WHERE
+            liked_posts.post_id = posts.id
+            AND liked_posts.username = $2) AS liked
 FROM
     posts
 WHERE
-    id < $1
+    posts.id < $1
     OR $1 = 0
+ORDER BY
+    posts.id DESC
 LIMIT 10;
 
 -- LikedPosts returns a user's liked posts.
@@ -114,6 +143,17 @@ WHERE
             liked_posts
         WHERE
             liked_posts.username = $1);
+
+-- LikePost likes a post.
+-- name: LikePost :exec
+INSERT INTO liked_posts (post_id, username, liked_at)
+    VALUES ($1, $2, now());
+
+-- UnlikePost removes a like of the current user from a post.
+-- name: UnlikePost :exec
+DELETE FROM liked_posts
+WHERE post_id = $1
+    AND username = $2;
 
 -- PostLikeCount returns the like count of the post with the given ID.
 -- name: PostLikeCount :one

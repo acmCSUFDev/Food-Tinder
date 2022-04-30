@@ -31,6 +31,15 @@ type User struct {
 	LikedPosts  []foodtinder.ID
 }
 
+func (u *User) likes(postID foodtinder.ID) bool {
+	for _, id := range u.LikedPosts {
+		if id == postID {
+			return true
+		}
+	}
+	return false
+}
+
 type Session struct {
 	Username string
 	Metadata foodtinder.LoginMetadata
@@ -40,7 +49,6 @@ type Session struct {
 type State struct {
 	Users     []User
 	Posts     []foodtinder.Post
-	Likes     map[string]map[foodtinder.ID]struct{}
 	Sessions  []foodtinder.Session
 	AssetURLs []string
 }

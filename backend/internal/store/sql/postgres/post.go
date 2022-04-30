@@ -10,15 +10,17 @@ import (
 
 type PostServer AuthorizedServer
 
-func (s *PostServer) NextPosts(ctx context.Context, previousID foodtinder.ID) ([]foodtinder.Post, error) {
-	r, err := s.queries.NextPosts(ctx, int64(previousID))
+func (s *PostServer) Post(ctx context.Context, id foodtinder.ID) (*foodtinder.PostListing, error) {
+	p, err := s.queries.GetPost(ctx, query.GetPostParams{
+		ID:       int64(id),
+		Username: s.session.Username,
+	})
 	if err != nil {
 		return nil, errors.Wrap(err, "SQL error")
 	}
 
-	posts := make([]foodtinder.Post, len(r))
-	for i, p := range r {
-		posts[i] = foodtinder.Post{
+	return &foodtinder.PostListing{
+		Post: foodtinder.Post{
 			ID:          foodtinder.ID(p.ID),
 			Username:    p.Username,
 			CoverHash:   p.CoverHash.String,
@@ -27,6 +29,34 @@ func (s *PostServer) NextPosts(ctx context.Context, previousID foodtinder.ID) ([
 			Tags:        p.Tags,
 			Location:    p.Location.String,
 			Likes:       int(p.Likes),
+		},
+		Liked: p.Liked != 0,
+	}, nil
+}
+
+func (s *PostServer) NextPosts(ctx context.Context, previousID foodtinder.ID) ([]foodtinder.PostListing, error) {
+	r, err := s.queries.NextPosts(ctx, query.NextPostsParams{
+		ID:       int64(previousID),
+		Username: s.session.Username,
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "SQL error")
+	}
+
+	posts := make([]foodtinder.PostListing, len(r))
+	for i, p := range r {
+		posts[i] = foodtinder.PostListing{
+			Post: foodtinder.Post{
+				ID:          foodtinder.ID(p.ID),
+				Username:    p.Username,
+				CoverHash:   p.CoverHash.String,
+				Images:      p.Images,
+				Description: p.Description.String,
+				Tags:        p.Tags,
+				Location:    p.Location.String,
+				Likes:       int(p.Likes),
+			},
+			Liked: p.Liked != 0,
 		}
 	}
 
@@ -54,6 +84,22 @@ func (s *PostServer) LikedPosts(ctx context.Context) ([]foodtinder.Post, error) 
 	}
 
 	return posts, nil
+}
+
+func (s *PostServer) LikePost(ctx context.Context, id foodtinder.ID, like bool) error {
+	params := query.LikePostParams{
+		PostID:   int64(id),
+		Username: s.session.Username,
+	}
+
+	var err error
+	if like {
+		err = s.queries.LikePost(ctx, params)
+	} else {
+		err = s.queries.UnlikePost(ctx, query.UnlikePostParams(params))
+	}
+
+	return err
 }
 
 func (s *PostServer) DeletePost(ctx context.Context, id foodtinder.ID) error {

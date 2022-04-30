@@ -53,6 +53,7 @@ export type Post = {
     description: string;
     tags: string[];
     location?: string;
+    likes: number;
 };
 export type PostListing = Post & {
     liked: boolean;
@@ -188,6 +189,23 @@ export function createPost(post?: Post, opts?: Oazapfts.RequestOpts) {
     })));
 }
 /**
+ * Get the post with the given ID.
+ */
+export function getPost(id: Id, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.ok(oazapfts.fetchJson<{
+        status: 200;
+        data: PostListing;
+    } | {
+        status: 404;
+        data: FormError;
+    } | {
+        status: 500;
+        data: Error;
+    }>(`/posts/${id}`, {
+        ...opts
+    }));
+}
+/**
  * Delete the current user's posts by ID. A 401 is returned if the user tries to delete someone else's post.
  */
 export function deletePost(id: Id, opts?: Oazapfts.RequestOpts) {
@@ -205,6 +223,29 @@ export function deletePost(id: Id, opts?: Oazapfts.RequestOpts) {
     }));
 }
 /**
+ * Like or unlike the post
+ */
+export function likePost(id: Id, body: {
+    like?: boolean;
+}, opts?: Oazapfts.RequestOpts) {
+    return oazapfts.ok(oazapfts.fetchJson<{
+        status: 200;
+    } | {
+        status: 400;
+        data: Error;
+    } | {
+        status: 404;
+        data: FormError;
+    } | {
+        status: 500;
+        data: Error;
+    }>(`/posts/${id}/like`, oazapfts.json({
+        ...opts,
+        method: "POST",
+        body
+    })));
+}
+/**
  * Get the list of posts liked by the user
  */
 export function getLikedPosts(opts?: Oazapfts.RequestOpts) {
@@ -216,15 +257,6 @@ export function getLikedPosts(opts?: Oazapfts.RequestOpts) {
         data: Error;
     }>("/posts/like", {
         ...opts
-    }));
-}
-/**
- * Like the post
- */
-export function postPostsLike(opts?: Oazapfts.RequestOpts) {
-    return oazapfts.ok(oazapfts.fetchText("/posts/like", {
-        ...opts,
-        method: "POST"
     }));
 }
 /**
