@@ -12,7 +12,7 @@ type postServer authorizedServer
 
 const pageSize = 10
 
-func (s *postServer) NextPosts(ctx context.Context, prevID foodtinder.ID) ([]foodtinder.Post, error) {
+func (s *postServer) NextPosts(ctx context.Context, prevID foodtinder.ID) ([]foodtinder.PostListing, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -34,8 +34,21 @@ ret:
 		endIx = len(s.store.Posts)
 	}
 
-	copied := append([]foodtinder.Post(nil), s.store.Posts[startIx:endIx]...)
-	return copied, nil
+	posts := s.store.Posts[startIx:endIx]
+	userLikes := s.store.Likes[s.session.Username]
+
+	listings := make([]foodtinder.PostListing, len(posts))
+
+	for i, post := range posts {
+		_, liked := userLikes[post.ID]
+
+		listings[i] = foodtinder.PostListing{
+			Post:  post,
+			Liked: liked,
+		}
+	}
+
+	return listings, nil
 }
 
 func (s *postServer) LikedPosts(ctx context.Context) ([]foodtinder.Post, error) {

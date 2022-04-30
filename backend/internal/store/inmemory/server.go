@@ -40,6 +40,7 @@ type Session struct {
 type State struct {
 	Users     []User
 	Posts     []foodtinder.Post
+	Likes     map[string]map[foodtinder.ID]struct{}
 	Sessions  []foodtinder.Session
 	AssetURLs []string
 }

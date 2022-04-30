@@ -233,7 +233,7 @@ func (h handler) GetNextPosts(w http.ResponseWriter, r *http.Request, params oap
 		})
 	}
 
-	return oapi.GetNextPostsJSON200Response(convertPostsToOAPI(p))
+	return oapi.GetNextPostsJSON200Response(convertPostListingsToOAPI(p))
 }
 
 func (h handler) CreatePost(w http.ResponseWriter, r *http.Request) *oapi.Response {
@@ -323,6 +323,14 @@ func (h handler) GetLikedPosts(w http.ResponseWriter, r *http.Request) *oapi.Res
 	return oapi.GetLikedPostsJSON200Response(convertPostsToOAPI(p))
 }
 
+func (h handler) PostPostsLike(w http.ResponseWriter, r *http.Request) *oapi.Response {
+	asrv := h.Server.AuthorizedServer(sessionFromContext(r.Context()))
+	psrv := asrv.PostServer()
+
+	_ = psrv
+	return nil
+}
+
 func (h handler) GetAsset(w http.ResponseWriter, r *http.Request, id string) *oapi.Response {
 	f, err := h.Server.FileServer().Open(id)
 	if err != nil {
@@ -356,6 +364,17 @@ func (h handler) UploadAsset(w http.ResponseWriter, r *http.Request) *oapi.Respo
 	}
 
 	return oapi.UploadAssetJSON200Response(id)
+}
+
+func convertPostListingsToOAPI(posts []foodtinder.PostListing) []oapi.PostListing {
+	conv := make([]oapi.PostListing, len(posts))
+	for i, p := range posts {
+		conv[i] = oapi.PostListing{
+			Post:  convertPostToOAPI(p.Post),
+			Liked: p.Liked,
+		}
+	}
+	return conv
 }
 
 func convertPostsToOAPI(posts []foodtinder.Post) []oapi.Post {

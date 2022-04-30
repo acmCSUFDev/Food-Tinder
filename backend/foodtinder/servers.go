@@ -54,12 +54,20 @@ type AuthorizedServer interface {
 	UserServer() UserServer
 }
 
+// PostListing describes a post listing returned by NextPosts. It contains
+// information that are specific to the current user.
+type PostListing struct {
+	Post
+	// Liked is whether or not the current user has liked a post.
+	Liked bool
+}
+
 // PostServer is a service serving Posts.
 type PostServer interface {
 	// NextPosts returns the list of posts that the user will see next
 	// starting from the given previous ID. If the ID is 0, then the top is
 	// assumed.
-	NextPosts(ctx context.Context, previousID ID) ([]Post, error)
+	NextPosts(ctx context.Context, previousID ID) ([]PostListing, error)
 	// LikedPosts returns the list of liked posts by the user.
 	LikedPosts(ctx context.Context) ([]Post, error)
 	// DeletePosts deletes the given posts. Only the posts that belong to the

@@ -185,7 +185,9 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "items": { "$ref": "#/components/schemas/Post" }
+                  "items": {
+                    "$ref": "#/components/schemas/PostListing"
+                  }
                 }
               }
             }
@@ -241,7 +243,7 @@
         }
       }
     },
-    "/posts/liked": {
+    "/posts/like": {
       "get": {
         "summary": "Get the list of posts liked by the user",
         "operationId": "getLikedPosts",
@@ -258,6 +260,9 @@
           },
           "500": { "$ref": "#/components/responses/ServerError" }
         }
+      },
+      "post": {
+        "summary": "Like the post"
       }
     },
     "/assets": {
@@ -567,6 +572,17 @@
             "example": "Fullerton, CA"
           }
         }
+      },
+      "PostListing": {
+        "allOf": [
+          { "$ref": "#/components/schemas/Post" },
+          {
+            "required": ["liked"],
+            "properties": {
+              "liked": { "type": "boolean" }
+            }
+          }
+        ]
       }
     }
   }

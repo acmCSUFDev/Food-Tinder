@@ -54,6 +54,9 @@ export type Post = {
     tags: string[];
     location?: string;
 };
+export type PostListing = Post & {
+    liked: boolean;
+};
 /**
  * Log in using username and password. A 401 is returned if the information is incorrect.
  */
@@ -152,9 +155,7 @@ export function getNextPosts({ prevId }: {
 } = {}, opts?: Oazapfts.RequestOpts) {
     return oazapfts.ok(oazapfts.fetchJson<{
         status: 200;
-        data: (Post & {
-            liked: boolean;
-        })[];
+        data: PostListing[];
     } | {
         status: 400;
         data: FormError;
