@@ -1,14 +1,16 @@
 module github.com/acmCSUFDev/Food-Tinder/backend
 
-go 1.17
+go 1.18
 
 require (
+	github.com/bbrks/go-blurhash v1.1.1
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/diamondburned/listener v0.0.0-20220315064222-63f8ebce5f60
 	github.com/discord-gophers/goapi-gen v0.1.1
 	github.com/getkin/kin-openapi v0.92.0
 	github.com/go-chi/chi v1.5.4
 	github.com/go-chi/chi/v5 v5.0.4
+	github.com/go-chi/cors v1.2.0
 	github.com/go-chi/render v1.0.1
 	github.com/jackc/pgconn v1.11.0
 	github.com/jackc/pgerrcode v0.0.0-20201024163028-a0d42d470451
@@ -22,9 +24,7 @@ require (
 )
 
 require (
-	github.com/bbrks/go-blurhash v1.1.1 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
-	github.com/go-chi/cors v1.2.0 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/swag v0.19.15 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect

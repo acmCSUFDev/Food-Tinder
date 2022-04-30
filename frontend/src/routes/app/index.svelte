@@ -8,7 +8,7 @@
 
 	let loading = true;
 
-	/** @type {Array<api.Post>} */
+	/** @type {Array<api.PostListing>} */
 	let posts = [];
 
 	// TODO: redesign the API lol.
@@ -39,8 +39,13 @@
 		}
 	}
 
-	async function likePost(id) {
-		_ = id;
+	function likePost(post) {
+		const liked = !post.liked;
+		api.likePost(post.id, { like: liked }).then(() => {
+			post.liked = liked;
+			post.likes = post.likes + (liked ? +1 : -1);
+			posts = posts; // force Svelte to reload.
+		});
 	}
 
 	svelte.onMount(() => {
@@ -71,11 +76,14 @@
 									{/if}
 									<span class="username">{post.username}</span>
 								</p>
-								<button class="like" on:click|preventDefault={likePost(post.id)}>
-									<img
-										alt="Like this post"
-										src="https://fonts.gstatic.com/s/i/materialicons/favorite/v17/24px.svg"
-									/>
+								<button
+									title="Like this post"
+									class="like"
+									class:liked={post.liked}
+									on:click={() => likePost(post)}
+								>
+									<div class="like-icon" />
+									<span class="like-count">{post.likes}</span>
 								</button>
 							</div>
 							<p class="post-description">{post.description}</p>
@@ -190,9 +198,39 @@
 		width: 38px;
 		height: 38px;
 		transition: linear 100ms all;
+		position: relative;
 	}
+
+	.like.liked {
+		--color: #ff0033;
+		opacity: 1;
+		border-color: var(--color);
+	}
+
 	.like:hover {
 		opacity: 0.65;
+	}
+
+	.like > .like-count {
+		position: absolute;
+		bottom: -2px;
+		right: -2px;
+		background: white;
+		width: 1.1em;
+		height: 1.1em;
+		border-radius: 99px;
+		line-height: 1em;
+	}
+
+	.like > .like-icon {
+		mask: url(https://fonts.gstatic.com/s/i/materialicons/favorite/v17/24px.svg) no-repeat center;
+		background-color: black;
+		width: 100%;
+		height: 100%;
+	}
+
+	.like.liked > .like-icon {
+		background-color: var(--color);
 	}
 
 	.post-body {

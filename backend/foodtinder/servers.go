@@ -64,12 +64,17 @@ type PostListing struct {
 
 // PostServer is a service serving Posts.
 type PostServer interface {
+	// Post queries a single post.
+	Post(ctx context.Context, id ID) (*PostListing, error)
 	// NextPosts returns the list of posts that the user will see next
 	// starting from the given previous ID. If the ID is 0, then the top is
 	// assumed.
 	NextPosts(ctx context.Context, previousID ID) ([]PostListing, error)
 	// LikedPosts returns the list of liked posts by the user.
 	LikedPosts(ctx context.Context) ([]Post, error)
+	// LikePost likes or unlikes the post with the given ID. The like belongs to
+	// the logged in user.
+	LikePost(ctx context.Context, id ID, like bool) error
 	// DeletePosts deletes the given posts. Only the posts that belong to the
 	// current user can be deleted.
 	DeletePost(ctx context.Context, id ID) error

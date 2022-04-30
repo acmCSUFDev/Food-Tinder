@@ -6,9 +6,7 @@
 
 Base URLs:
 
-* <a href="https://{hostname}/api/v0">https://{hostname}/api/v0</a>
-
-    * **hostname** - The domain of the API backend server Default: localhost
+* <a href="/api/v0">/api/v0</a>
 
 # Authentication
 
@@ -37,7 +35,7 @@ Base URLs:
 
 ```json
 {
-  "user_id": "953809515621527562",
+  "username": "food_tinder_user",
   "token": "WlvPXdNuyfttl8eSV67hkbsX51wLURzT",
   "expiry": "2019-08-24T14:15:22Z",
   "metadata": {
@@ -79,7 +77,7 @@ This operation does not require authentication
 
 ```json
 {
-  "user_id": "953809515621527562",
+  "username": "food_tinder_user",
   "token": "WlvPXdNuyfttl8eSV67hkbsX51wLURzT",
   "expiry": "2019-08-24T14:15:22Z",
   "metadata": {
@@ -100,11 +98,46 @@ This operation does not require authentication
 This operation does not require authentication
 </aside>
 
+## listFoods
+
+<a id="opIdlistFoods"></a>
+
+`GET /food/list`
+
+*Get the list of all valid food categories and names.*
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "Rice": [
+    "Sushi Rice"
+  ],
+  "Fish": [
+    "Ahi Tuna",
+    "Salmon"
+  ]
+}
+```
+
+<h3 id="listfoods-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|[FoodCategories](#schemafoodcategories)|
+|500|[Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1)|Unexpected server error.|[Error](#schemaerror)|
+
+<aside class="success">
+This operation does not require authentication
+</aside>
+
 ## getSelf
 
 <a id="opIdgetSelf"></a>
 
-`GET /users/self`
+`GET /users/@self`
 
 *Get the current user*
 
@@ -132,16 +165,15 @@ BearerAuth
 
 <a id="opIdgetUser"></a>
 
-`GET /users/{id}`
+`GET /users/{username}`
 
-*Get a user by their ID*
+*Get a user by their username*
 
 <h3 id="getuser-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
-|id|path|[ID](#schemaid)|true|The ID of the user.|
-|password|query|string(password)|true|none|
+|username|path|string|true|The username of the user.|
 
 > Example responses
 
@@ -149,8 +181,8 @@ BearerAuth
 
 ```json
 {
-  "id": "953809515621527562",
-  "name": "food-tinder-user",
+  "username": "food-tinder-user",
+  "display_name": "Food Tinder User",
   "avatar": "ypeBEsobvcr6wjGzmiPcTaeG7_gUfE5yuYB3ha_uSLs=",
   "bio": "Hello, world."
 }
@@ -190,20 +222,7 @@ BearerAuth
 
 ```json
 [
-  {
-    "id": "953809515621527562",
-    "user_id": "953809515621527562",
-    "cover_hash": "LEHV6nWB2yk8pyoJadR*.7kCMdnj",
-    "images": [
-      "ypeBEsobvcr6wjGzmiPcTaeG7_gUfE5yuYB3ha_uSLs="
-    ],
-    "description": "Salmon roll for $8.\n\nPretty cheap for me.",
-    "tags": [
-      "Salmon",
-      "Sushi Rice"
-    ],
-    "location": "Fullerton, CA"
-  }
+  null
 ]
 ```
 
@@ -221,14 +240,134 @@ Status Code **200**
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|*anonymous*|[[Post](#schemapost)]|false|none|none|
-|» id|[ID](#schemaid)|true|none|Snowflake ID.|
-|» user_id|[ID](#schemaid)|true|none|Snowflake ID.|
-|» cover_hash|string|false|none|none|
-|» images|[string]|true|none|none|
-|» description|string|true|none|none|
-|» tags|[string]|true|none|none|
-|» location|string|false|none|Location is the location where the post was made.|
+|*anonymous*|[allOf]|false|none|none|
+
+*allOf*
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|object|false|none|none|
+|»» id|[ID](#schemaid)|true|none|Snowflake ID.|
+|»» username|string|true|none|none|
+|»» cover_hash|string|false|none|none|
+|»» images|[string]|true|none|none|
+|»» description|string|true|none|none|
+|»» tags|[string]|true|none|none|
+|»» location|string|false|none|Location is the location where the post was made.|
+|»» likes|integer|true|none|Likes is the number of likes of this post.|
+
+*and*
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|object|false|none|none|
+|»» liked|boolean|true|none|none|
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+BearerAuth
+</aside>
+
+## createPost
+
+<a id="opIdcreatePost"></a>
+
+`POST /posts`
+
+*Create a new post*
+
+Create a new post and return the newly created post with an ID.
+
+> Body parameter
+
+```json
+{
+  "id": "953809515621527562",
+  "username": "food_tinder_user",
+  "cover_hash": "LEHV6nWB2yk8pyoJadR*.7kCMdnj",
+  "images": [
+    "ypeBEsobvcr6wjGzmiPcTaeG7_gUfE5yuYB3ha_uSLs="
+  ],
+  "description": "Salmon roll for $8.\n\nPretty cheap for me.",
+  "tags": [
+    "Salmon",
+    "Sushi Rice"
+  ],
+  "location": "Fullerton, CA",
+  "likes": 10
+}
+```
+
+<h3 id="createpost-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|[Post](#schemapost)|false|The data of the new post.|
+
+> Example responses
+
+> 200 Response
+
+```json
+{
+  "id": "953809515621527562",
+  "username": "food_tinder_user",
+  "cover_hash": "LEHV6nWB2yk8pyoJadR*.7kCMdnj",
+  "images": [
+    "ypeBEsobvcr6wjGzmiPcTaeG7_gUfE5yuYB3ha_uSLs="
+  ],
+  "description": "Salmon roll for $8.\n\nPretty cheap for me.",
+  "tags": [
+    "Salmon",
+    "Sushi Rice"
+  ],
+  "location": "Fullerton, CA",
+  "likes": 10
+}
+```
+
+<h3 id="createpost-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|[Post](#schemapost)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|User error.|[Error](#schemaerror)|
+|500|[Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1)|Unexpected server error.|[Error](#schemaerror)|
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+BearerAuth
+</aside>
+
+## getPost
+
+<a id="opIdgetPost"></a>
+
+`GET /posts/{id}`
+
+*Get the post with the given ID.*
+
+<h3 id="getpost-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|[ID](#schemaid)|true|The post ID to delete.|
+
+> Example responses
+
+> 200 Response
+
+```json
+null
+```
+
+<h3 id="getpost-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|none|[PostListing](#schemapostlisting)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|Resource indicated by a parameter (if any) isn't found.|[FormError](#schemaformerror)|
+|500|[Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1)|Unexpected server error.|[Error](#schemaerror)|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
@@ -273,11 +412,58 @@ To perform this operation, you must be authenticated by means of one of the foll
 BearerAuth
 </aside>
 
+## likePost
+
+<a id="opIdlikePost"></a>
+
+`POST /posts/{id}/like`
+
+*Like or unlike the post*
+
+> Body parameter
+
+```json
+{
+  "like": true
+}
+```
+
+<h3 id="likepost-parameters">Parameters</h3>
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|id|path|[ID](#schemaid)|true|The post ID to delete.|
+|body|body|object|true|The data to set whether or not the post is liked.|
+
+> Example responses
+
+> 400 Response
+
+```json
+{
+  "message": "server blew up"
+}
+```
+
+<h3 id="likepost-responses">Responses</h3>
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Post liked or unliked successfully.|None|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|User error.|[Error](#schemaerror)|
+|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|Resource indicated by a parameter (if any) isn't found.|[FormError](#schemaformerror)|
+|500|[Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1)|Unexpected server error.|[Error](#schemaerror)|
+
+<aside class="warning">
+To perform this operation, you must be authenticated by means of one of the following methods:
+BearerAuth
+</aside>
+
 ## getLikedPosts
 
 <a id="opIdgetLikedPosts"></a>
 
-`GET /posts/liked`
+`GET /posts/like`
 
 *Get the list of posts liked by the user*
 
@@ -289,7 +475,7 @@ BearerAuth
 [
   {
     "id": "953809515621527562",
-    "user_id": "953809515621527562",
+    "username": "food_tinder_user",
     "cover_hash": "LEHV6nWB2yk8pyoJadR*.7kCMdnj",
     "images": [
       "ypeBEsobvcr6wjGzmiPcTaeG7_gUfE5yuYB3ha_uSLs="
@@ -299,7 +485,8 @@ BearerAuth
       "Salmon",
       "Sushi Rice"
     ],
-    "location": "Fullerton, CA"
+    "location": "Fullerton, CA",
+    "likes": 10
   }
 ]
 ```
@@ -319,12 +506,13 @@ Status Code **200**
 |---|---|---|---|---|
 |*anonymous*|[[Post](#schemapost)]|false|none|none|
 |» id|[ID](#schemaid)|true|none|Snowflake ID.|
-|» user_id|[ID](#schemaid)|true|none|Snowflake ID.|
+|» username|string|true|none|none|
 |» cover_hash|string|false|none|none|
 |» images|[string]|true|none|none|
 |» description|string|true|none|none|
 |» tags|[string]|true|none|none|
 |» location|string|false|none|Location is the location where the post was made.|
+|» likes|integer|true|none|Likes is the number of likes of this post.|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
@@ -337,39 +525,28 @@ BearerAuth
 
 `POST /assets`
 
-*Upload any asset. Maximum filesize is 1MB.*
+*Upload an asset*
 
-<h3 id="uploadasset-parameters">Parameters</h3>
+Upload any file as an asset and get back the asset hash/ID.
 
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|content|formData|undefined|true|The content of the file.|
+> Body parameter
 
 > Example responses
 
 > 200 Response
 
 ```json
-{
-  "id": "string"
-}
+"string"
 ```
 
 <h3 id="uploadasset-responses">Responses</h3>
 
 |Status|Meaning|Description|Schema|
 |---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|File uploaded successfully|Inline|
-|413|[Payload Too Large](https://tools.ietf.org/html/rfc7231#section-6.5.11)|File too big.|[Error](#schemaerror)|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Asset uploaded successfully.|string|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|User error.|[Error](#schemaerror)|
+|413|[Payload Too Large](https://tools.ietf.org/html/rfc7231#section-6.5.11)|Asset file was too big. It should be 1MB or less.|[Error](#schemaerror)|
 |500|[Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1)|Unexpected server error.|[Error](#schemaerror)|
-
-<h3 id="uploadasset-responseschema">Response Schema</h3>
-
-Status Code **200**
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» id|string|false|none|none|
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
@@ -411,9 +588,8 @@ BearerAuth
 |404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|Resource indicated by a parameter (if any) isn't found.|[FormError](#schemaformerror)|
 |500|[Internal Server Error](https://tools.ietf.org/html/rfc7231#section-6.6.1)|Unexpected server error.|[Error](#schemaerror)|
 
-<aside class="warning">
-To perform this operation, you must be authenticated by means of one of the following methods:
-BearerAuth
+<aside class="success">
+This operation does not require authentication
 </aside>
 
 # Schemas
@@ -523,7 +699,7 @@ Optional metadata included on login.
 
 ```json
 {
-  "user_id": "953809515621527562",
+  "username": "food_tinder_user",
   "token": "WlvPXdNuyfttl8eSV67hkbsX51wLURzT",
   "expiry": "2019-08-24T14:15:22Z",
   "metadata": {
@@ -537,7 +713,7 @@ Optional metadata included on login.
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|user_id|[ID](#schemaid)|true|none|Snowflake ID.|
+|username|string|true|none|none|
 |token|string|true|none|none|
 |expiry|string(date-time)|true|none|none|
 |metadata|[LoginMetadata](#schemaloginmetadata)|true|none|Optional metadata included on login.|
@@ -573,7 +749,7 @@ and
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |*anonymous*|object|false|none|none|
-|» birthday|string(date)|true|none|none|
+|» birthday|string(date)|false|none|none|
 
 <h2 id="tocS_User">User</h2>
 <!-- backwards compatibility -->
@@ -584,8 +760,8 @@ and
 
 ```json
 {
-  "id": "953809515621527562",
-  "name": "food-tinder-user",
+  "username": "food-tinder-user",
+  "display_name": "Food Tinder User",
   "avatar": "ypeBEsobvcr6wjGzmiPcTaeG7_gUfE5yuYB3ha_uSLs=",
   "bio": "Hello, world."
 }
@@ -596,8 +772,8 @@ and
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|id|[ID](#schemaid)|true|none|Snowflake ID.|
-|name|string|true|none|none|
+|username|string|true|none|none|
+|display_name|string|false|none|none|
 |avatar|string|true|none|none|
 |bio|string|false|none|none|
 
@@ -632,8 +808,33 @@ and
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |likes|[string]|true|none|none|
-|prefers|object|true|none|none|
-|» **additionalProperties**|[string]|false|none|none|
+|prefers|[FoodCategories](#schemafoodcategories)|true|none|none|
+
+<h2 id="tocS_FoodCategories">FoodCategories</h2>
+<!-- backwards compatibility -->
+<a id="schemafoodcategories"></a>
+<a id="schema_FoodCategories"></a>
+<a id="tocSfoodcategories"></a>
+<a id="tocsfoodcategories"></a>
+
+```json
+{
+  "Rice": [
+    "Sushi Rice"
+  ],
+  "Fish": [
+    "Ahi Tuna",
+    "Salmon"
+  ]
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|**additionalProperties**|[string]|false|none|none|
 
 <h2 id="tocS_UserLikedPosts">UserLikedPosts</h2>
 <!-- backwards compatibility -->
@@ -673,7 +874,7 @@ and
 ```json
 {
   "id": "953809515621527562",
-  "user_id": "953809515621527562",
+  "username": "food_tinder_user",
   "cover_hash": "LEHV6nWB2yk8pyoJadR*.7kCMdnj",
   "images": [
     "ypeBEsobvcr6wjGzmiPcTaeG7_gUfE5yuYB3ha_uSLs="
@@ -683,7 +884,8 @@ and
     "Salmon",
     "Sushi Rice"
   ],
-  "location": "Fullerton, CA"
+  "location": "Fullerton, CA",
+  "likes": 10
 }
 
 ```
@@ -693,10 +895,38 @@ and
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |id|[ID](#schemaid)|true|none|Snowflake ID.|
-|user_id|[ID](#schemaid)|true|none|Snowflake ID.|
+|username|string|true|none|none|
 |cover_hash|string|false|none|none|
 |images|[string]|true|none|none|
 |description|string|true|none|none|
 |tags|[string]|true|none|none|
 |location|string|false|none|Location is the location where the post was made.|
+|likes|integer|true|none|Likes is the number of likes of this post.|
+
+<h2 id="tocS_PostListing">PostListing</h2>
+<!-- backwards compatibility -->
+<a id="schemapostlisting"></a>
+<a id="schema_PostListing"></a>
+<a id="tocSpostlisting"></a>
+<a id="tocspostlisting"></a>
+
+```json
+null
+
+```
+
+### Properties
+
+allOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|*anonymous*|[Post](#schemapost)|false|none|none|
+
+and
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|*anonymous*|object|false|none|none|
+|» liked|boolean|true|none|none|
 

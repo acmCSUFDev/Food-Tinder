@@ -12,9 +12,37 @@ type postServer authorizedServer
 
 const pageSize = 10
 
+func (s *postServer) Post(ctx context.Context, id foodtinder.ID) (*foodtinder.PostListing, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	u, err := (*userServer)(s).self()
+	if err != nil {
+		return nil, err
+	}
+
+	p, ok := s.post(id)
+	if ok {
+		p := *p
+		p.Likes = s.countLikes(id)
+
+		return &foodtinder.PostListing{
+			Post:  p,
+			Liked: u.likes(p.ID),
+		}, nil
+	}
+
+	return nil, foodtinder.ErrNotFound
+}
+
 func (s *postServer) NextPosts(ctx context.Context, prevID foodtinder.ID) ([]foodtinder.PostListing, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
+
+	u, err := (*userServer)(s).self()
+	if err != nil {
+		return nil, err
+	}
 
 	var startIx int
 
@@ -35,16 +63,14 @@ ret:
 	}
 
 	posts := s.store.Posts[startIx:endIx]
-	userLikes := s.store.Likes[s.session.Username]
-
 	listings := make([]foodtinder.PostListing, len(posts))
 
 	for i, post := range posts {
-		_, liked := userLikes[post.ID]
+		post.Likes = s.countLikes(post.ID)
 
 		listings[i] = foodtinder.PostListing{
 			Post:  post,
-			Liked: liked,
+			Liked: u.likes(post.ID),
 		}
 	}
 
@@ -72,6 +98,36 @@ func (s *postServer) LikedPosts(ctx context.Context) ([]foodtinder.Post, error) 
 	return posts, nil
 }
 
+func (s *postServer) LikePost(ctx context.Context, id foodtinder.ID, like bool) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	u, err := (*userServer)(s).self()
+	if err != nil {
+		return err
+	}
+
+	if _, ok := s.post(id); !ok {
+		return foodtinder.ErrNotFound
+	}
+
+	if like {
+		if !u.likes(id) {
+			u.LikedPosts = append(u.LikedPosts, id)
+		}
+		return nil
+	}
+
+	for i, likedID := range u.LikedPosts {
+		if likedID == id {
+			u.LikedPosts = append(u.LikedPosts[:i], u.LikedPosts[i+1:]...)
+			return nil
+		}
+	}
+
+	return nil
+}
+
 func (s *postServer) post(id foodtinder.ID) (*foodtinder.Post, bool) {
 	for i, post := range s.store.Posts {
 		if post.ID == id {
@@ -79,6 +135,20 @@ func (s *postServer) post(id foodtinder.ID) (*foodtinder.Post, bool) {
 		}
 	}
 	return nil, false
+}
+
+func (s *postServer) countLikes(postID foodtinder.ID) int {
+	var likes int
+userLoop:
+	for _, user := range s.store.Users {
+		for _, id := range user.LikedPosts {
+			if id == postID {
+				likes++
+				continue userLoop
+			}
+		}
+	}
+	return likes
 }
 
 func (s *postServer) DeletePost(ctx context.Context, id foodtinder.ID) error {

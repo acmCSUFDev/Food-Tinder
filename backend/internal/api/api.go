@@ -216,6 +216,24 @@ func (h handler) GetUser(w http.ResponseWriter, r *http.Request, username string
 	})
 }
 
+func (h handler) GetPost(w http.ResponseWriter, r *http.Request, id oapi.ID) *oapi.Response {
+	asrv := h.Server.AuthorizedServer(sessionFromContext(r.Context()))
+	psrv := asrv.PostServer()
+
+	p, err := psrv.Post(r.Context(), foodtinder.ID(id))
+	if err != nil {
+		if errors.Is(err, foodtinder.ErrNotFound) {
+			return oapi.GetPostJSON404Response(oapi.FormError{
+				FormID: "id",
+				Error:  oapi.RespErr(err),
+			})
+		}
+		return oapi.GetPostJSON500Response(oapi.RespErr(err))
+	}
+
+	return oapi.GetPostJSON200Response(convertPostListingToOAPI(*p))
+}
+
 func (h handler) GetNextPosts(w http.ResponseWriter, r *http.Request, params oapi.GetNextPostsParams) *oapi.Response {
 	asrv := h.Server.AuthorizedServer(sessionFromContext(r.Context()))
 	psrv := asrv.PostServer()
@@ -233,7 +251,7 @@ func (h handler) GetNextPosts(w http.ResponseWriter, r *http.Request, params oap
 		})
 	}
 
-	return oapi.GetNextPostsJSON200Response(convertPostListingsToOAPI(p))
+	return oapi.GetNextPostsJSON200Response(sliceConvert(p, convertPostListingToOAPI))
 }
 
 func (h handler) CreatePost(w http.ResponseWriter, r *http.Request) *oapi.Response {
@@ -320,14 +338,34 @@ func (h handler) GetLikedPosts(w http.ResponseWriter, r *http.Request) *oapi.Res
 		return oapi.GetLikedPostsJSON500Response(oapi.RespErr(err))
 	}
 
-	return oapi.GetLikedPostsJSON200Response(convertPostsToOAPI(p))
+	return oapi.GetLikedPostsJSON200Response(sliceConvert(p, convertPostToOAPI))
 }
 
-func (h handler) PostPostsLike(w http.ResponseWriter, r *http.Request) *oapi.Response {
+func (h handler) LikePost(w http.ResponseWriter, r *http.Request, id oapi.ID) *oapi.Response {
+	var body struct {
+		Like bool `json:"like"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		if errors.Is(err, io.EOF) {
+			err = io.ErrUnexpectedEOF
+		}
+		return oapi.LikePostJSON400Response(oapi.RespErr(err))
+	}
+
 	asrv := h.Server.AuthorizedServer(sessionFromContext(r.Context()))
 	psrv := asrv.PostServer()
 
-	_ = psrv
+	if err := psrv.LikePost(r.Context(), foodtinder.ID(id), body.Like); err != nil {
+		if errors.Is(err, foodtinder.ErrNotFound) {
+			return oapi.LikePostJSON404Response(oapi.FormError{
+				FormID: "id",
+				Error:  oapi.RespErr(err),
+			})
+		}
+		return oapi.LikePostJSON500Response(oapi.RespErr(err))
+	}
+
 	return nil
 }
 
@@ -366,23 +404,11 @@ func (h handler) UploadAsset(w http.ResponseWriter, r *http.Request) *oapi.Respo
 	return oapi.UploadAssetJSON200Response(id)
 }
 
-func convertPostListingsToOAPI(posts []foodtinder.PostListing) []oapi.PostListing {
-	conv := make([]oapi.PostListing, len(posts))
-	for i, p := range posts {
-		conv[i] = oapi.PostListing{
-			Post:  convertPostToOAPI(p.Post),
-			Liked: p.Liked,
-		}
+func convertPostListingToOAPI(post foodtinder.PostListing) oapi.PostListing {
+	return oapi.PostListing{
+		Post:  convertPostToOAPI(post.Post),
+		Liked: post.Liked,
 	}
-	return conv
-}
-
-func convertPostsToOAPI(posts []foodtinder.Post) []oapi.Post {
-	conv := make([]oapi.Post, len(posts))
-	for i, p := range posts {
-		conv[i] = convertPostToOAPI(p)
-	}
-	return conv
 }
 
 func convertPostToOAPI(post foodtinder.Post) oapi.Post {
@@ -394,7 +420,16 @@ func convertPostToOAPI(post foodtinder.Post) oapi.Post {
 		Description: post.Description,
 		Tags:        post.Tags,
 		Location:    post.Location,
+		Likes:       post.Likes,
 	}
+}
+
+func sliceConvert[T1, T2 any](slice []T1, convFunc func(T1) T2) []T2 {
+	conv := make([]T2, len(slice))
+	for i, p := range slice {
+		conv[i] = convFunc(p)
+	}
+	return conv
 }
 
 func emptystr(str *string) string {

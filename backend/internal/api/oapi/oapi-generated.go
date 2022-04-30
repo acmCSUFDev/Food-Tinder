@@ -71,6 +71,9 @@ type Post struct {
 	ID     ID       `json:"id"`
 	Images []string `json:"images"`
 
+	// Likes is the number of likes of this post.
+	Likes int `json:"likes"`
+
 	// Location is the location where the post was made.
 	Location string   `json:"location,omitempty"`
 	Tags     []string `json:"tags"`
@@ -137,6 +140,11 @@ type GetNextPostsParams struct {
 // CreatePostJSONBody defines parameters for CreatePost.
 type CreatePostJSONBody Post
 
+// LikePostJSONBody defines parameters for LikePost.
+type LikePostJSONBody struct {
+	Like *bool `json:"like,omitempty"`
+}
+
 // RegisterParams defines parameters for Register.
 type RegisterParams struct {
 	Username string `json:"username"`
@@ -148,6 +156,14 @@ type CreatePostJSONRequestBody CreatePostJSONBody
 
 // Bind implements render.Binder.
 func (CreatePostJSONRequestBody) Bind(*http.Request) error {
+	return nil
+}
+
+// LikePostJSONRequestBody defines body for LikePost for application/json ContentType.
+type LikePostJSONRequestBody LikePostJSONBody
+
+// Bind implements render.Binder.
+func (LikePostJSONRequestBody) Bind(*http.Request) error {
 	return nil
 }
 
@@ -401,6 +417,66 @@ func DeletePostJSON500Response(body Error) *Response {
 	}
 }
 
+// GetPostJSON200Response is a constructor method for a GetPost response.
+// A *Response is returned with the configured status code and content type from the spec.
+func GetPostJSON200Response(body PostListing) *Response {
+	return &Response{
+		body:        body,
+		statusCode:  200,
+		contentType: "application/json",
+	}
+}
+
+// GetPostJSON404Response is a constructor method for a GetPost response.
+// A *Response is returned with the configured status code and content type from the spec.
+func GetPostJSON404Response(body FormError) *Response {
+	return &Response{
+		body:        body,
+		statusCode:  404,
+		contentType: "application/json",
+	}
+}
+
+// GetPostJSON500Response is a constructor method for a GetPost response.
+// A *Response is returned with the configured status code and content type from the spec.
+func GetPostJSON500Response(body Error) *Response {
+	return &Response{
+		body:        body,
+		statusCode:  500,
+		contentType: "application/json",
+	}
+}
+
+// LikePostJSON400Response is a constructor method for a LikePost response.
+// A *Response is returned with the configured status code and content type from the spec.
+func LikePostJSON400Response(body Error) *Response {
+	return &Response{
+		body:        body,
+		statusCode:  400,
+		contentType: "application/json",
+	}
+}
+
+// LikePostJSON404Response is a constructor method for a LikePost response.
+// A *Response is returned with the configured status code and content type from the spec.
+func LikePostJSON404Response(body FormError) *Response {
+	return &Response{
+		body:        body,
+		statusCode:  404,
+		contentType: "application/json",
+	}
+}
+
+// LikePostJSON500Response is a constructor method for a LikePost response.
+// A *Response is returned with the configured status code and content type from the spec.
+func LikePostJSON500Response(body Error) *Response {
+	return &Response{
+		body:        body,
+		statusCode:  500,
+		contentType: "application/json",
+	}
+}
+
 // RegisterJSON200Response is a constructor method for a Register response.
 // A *Response is returned with the configured status code and content type from the spec.
 func RegisterJSON200Response(body Session) *Response {
@@ -567,12 +643,15 @@ type ServerInterface interface {
 	// Get the list of posts liked by the user
 	// (GET /posts/like)
 	GetLikedPosts(w http.ResponseWriter, r *http.Request) *Response
-	// Like the post
-	// (POST /posts/like)
-	PostPostsLike(w http.ResponseWriter, r *http.Request) *Response
 	// Delete the current user's posts by ID. A 401 is returned if the user tries to delete someone else's post.
 	// (DELETE /posts/{id})
 	DeletePost(w http.ResponseWriter, r *http.Request, id ID) *Response
+	// Get the post with the given ID.
+	// (GET /posts/{id})
+	GetPost(w http.ResponseWriter, r *http.Request, id ID) *Response
+	// Like or unlike the post
+	// (POST /posts/{id}/like)
+	LikePost(w http.ResponseWriter, r *http.Request, id ID) *Response
 	// Register using username and password
 	// (POST /register)
 	Register(w http.ResponseWriter, r *http.Request, params RegisterParams) *Response
@@ -732,22 +811,6 @@ func (siw *ServerInterfaceWrapper) GetLikedPosts(w http.ResponseWriter, r *http.
 	handler(w, r.WithContext(ctx))
 }
 
-// PostPostsLike operation middleware
-func (siw *ServerInterfaceWrapper) PostPostsLike(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	ctx = context.WithValue(ctx, BearerAuthScopes, []string{""})
-
-	var handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		resp := siw.Handler.PostPostsLike(w, r)
-		if resp != nil {
-			render.Render(w, r, resp)
-		}
-	})
-
-	handler(w, r.WithContext(ctx))
-}
-
 // DeletePost operation middleware
 func (siw *ServerInterfaceWrapper) DeletePost(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -764,6 +827,54 @@ func (siw *ServerInterfaceWrapper) DeletePost(w http.ResponseWriter, r *http.Req
 
 	var handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		resp := siw.Handler.DeletePost(w, r, id)
+		if resp != nil {
+			render.Render(w, r, resp)
+		}
+	})
+
+	handler(w, r.WithContext(ctx))
+}
+
+// GetPost operation middleware
+func (siw *ServerInterfaceWrapper) GetPost(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	// ------------- Path parameter "id" -------------
+	var id ID
+
+	if err := runtime.BindStyledParameter("simple", false, "id", chi.URLParam(r, "id"), &id); err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{err, "id"})
+		return
+	}
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{""})
+
+	var handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resp := siw.Handler.GetPost(w, r, id)
+		if resp != nil {
+			render.Render(w, r, resp)
+		}
+	})
+
+	handler(w, r.WithContext(ctx))
+}
+
+// LikePost operation middleware
+func (siw *ServerInterfaceWrapper) LikePost(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	// ------------- Path parameter "id" -------------
+	var id ID
+
+	if err := runtime.BindStyledParameter("simple", false, "id", chi.URLParam(r, "id"), &id); err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{err, "id"})
+		return
+	}
+
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{""})
+
+	var handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		resp := siw.Handler.LikePost(w, r, id)
 		if resp != nil {
 			render.Render(w, r, resp)
 		}
@@ -968,8 +1079,9 @@ func Handler(si ServerInterface, opts ...ServerOption) http.Handler {
 		r.Get("/posts", wrapper.GetNextPosts)
 		r.Post("/posts", wrapper.CreatePost)
 		r.Get("/posts/like", wrapper.GetLikedPosts)
-		r.Post("/posts/like", wrapper.PostPostsLike)
 		r.Delete("/posts/{id}", wrapper.DeletePost)
+		r.Get("/posts/{id}", wrapper.GetPost)
+		r.Post("/posts/{id}/like", wrapper.LikePost)
 		r.Post("/register", wrapper.Register)
 		r.Get("/users/@self", wrapper.GetSelf)
 		r.Get("/users/{username}", wrapper.GetUser)
@@ -1011,43 +1123,45 @@ func WithErrorHandler(handler func(w http.ResponseWriter, r *http.Request, err e
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"1IIOaJ8VvD/Zp7Ph7H8BAAD//91q01pyIwAA",
+	"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",
+	"YXbhys1uHj95sVO92R5S1dx83YxZDqatiTpUpx2ioHZu/909QsmBEivDmNk4RSb0Pl5GG1rd5xqYBcJc",
+	"d+fOJTC0fBwFaXOxILFbloSTC25TbEW62l0vz03g27rd2ye1H+6vb4NLe76/E95Fm1t1q9/p75braknd",
+	"F/wStmX2Kb+EpEztH5MuG/LkjqK+rPzOfHeml5StmJt0a9iUDXMCAiy04Xnh7ocYvpb2XEp47vMCb9c1",
+	"35bW1mYTIQIC9coaFEtChf1xXXPlJQ+p710LrcNxun5ggrbjhWuVNxYyV46ta+AqnIlRGSgJBISBB2aV",
+	"7Zti/n/Eo3dGTFV9+uHTUis7V3WjMRutZ2VFWxuacX7535mWtytz7ePpztPpbcUOOymw2LbaFDR2WDhY",
+	"VojzwIS9lo3LXdgEsQ5UqjQppP95F+c0f0YsYvSs7KhA8jGoYcqNDafBncH3vlzx/2HwTofBEtdbR9Yd",
+	"9NAbZq9StW3Tlw8ffGT6/zThc9GmCuQ+J90rzGJyt21VvVrXTf1WgrH16DF8nbiWrCtk1arcb+DrnRLr",
+	"Rt+O7jPu/RfBW86Df1rFZr7f8u0z1/V/fTSzpflt5/MIsfT/aOry9Cf/lYYMyNHZCUG3oo8LLeiQ9lnO",
+	"+7MBXY6W/wkAAP//UKwGKL0nAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
