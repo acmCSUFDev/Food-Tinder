@@ -3,13 +3,12 @@
 	export let value = '';
 	export let error = false;
 	export let password = false;
-	export let description = false;
 </script>
 
 {#if password}
 	<input placeholder={placeholderText} class:error bind:value type="password" />
 {:else}
-	<input placeholder={placeholderText} class:error class:description bind:value type="text" />
+	<input placeholder={placeholderText} class:error bind:value type="text" />
 {/if}
 
 <style>
@@ -29,12 +28,5 @@
 	input:focus {
 		border-color: var(--accent-foreground);
 		box-shadow: 0 0 12px -2px var(--accent-foreground);
-	}
-	/* comback */
-	.description {
-		font-size: 18px;
-		display: inline-block;
-		min-height: inherit;
-		max-height: 600px;
 	}
 </style>
