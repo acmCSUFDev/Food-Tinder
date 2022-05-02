@@ -2,16 +2,18 @@
 	export let suggested = false;
 	export let secondary = false;
 	export let disabled = false;
+	export let ternary = false;
+	export let quaternary = false;
 	export let href = '';
 	export let onclick = () => {};
 </script>
 
 {#if href}
-	<a class:suggested class:secondary class:disabled {href} role="button">
+	<a class:suggested class:secondary class:ternary class:disabled {href} role="button">
 		<slot />
 	</a>
 {:else}
-	<button class:suggested class:secondary class:disabled on:click={onclick}>
+	<button class:suggested class:secondary class:quaternary class:disabled on:click={onclick}>
 		<slot />
 	</button>
 {/if}
@@ -45,6 +47,28 @@
 
 	*.secondary:hover {
 		border-color: var(--accent-foreground);
+		background-color: rgba(255, 255, 255, 0.85);
+	}
+
+	*.ternary {
+		background-color: black;
+		transition: all 300ms;
+	}
+
+	*.ternary:hover {
+		background-color: var(--accent-foreground);
+	}
+
+	*.quaternary {
+		border-color: black;
+		color: black;
+		background-color: white;
+		transition: all 300ms;
+	}
+
+	*.quaternary:hover {
+		border-color: var(--accent-foreground);
+		color: var(--accent-foreground);
 		background-color: rgba(255, 255, 255, 0.85);
 	}
 

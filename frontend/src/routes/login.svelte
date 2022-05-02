@@ -43,7 +43,7 @@
 		<Loading />
 	{:else}
 		<Card seamless>
-			<Logo>
+			<Logo intro>
 				<img class="logo" src="/static/bobaBub.png" alt="Mascot of Food Tinder, Boba Bub" />
 				<h2>Food Tinder</h2>
 			</Logo>

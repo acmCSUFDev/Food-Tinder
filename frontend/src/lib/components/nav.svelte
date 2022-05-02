@@ -8,7 +8,7 @@
 	</div>
 	<div class="right">
 		<!-- Create new post button -->
-		<Button ternary href="/newpost"><ion-icon name="add-circle-outline" class="right" /></Button>
+		<Button ternary href="/newpost"><ion-icon name="add-circle-outline" /></Button>
 		<!-- Log out button -->
 		<Button ternary href="/logout"><ion-icon name="log-out-outline" /></Button>
 	</div>

@@ -33,21 +33,31 @@
 					width="150"
 					height="150"
 				/>
-				<h3>Create New Post</h3>
+				<h3>Upload Images</h3>
 			</Logo>
-
-			<InputField placeholderText="Location" bind:value={location} />
-			<InputField placeholderText="Description" bind:value={description} />
-			<Button suggested onclick={nextPage}>Next</Button>
-		{:else}
-			<h3 class="uploadTitle">Upload Images</h3>
 			<div class="img-Grid">
 				<Images fileName={img1} bind:value={img1} />
 				<Images fileName={img2} bind:value={img2} />
 				<Images fileName={img3} bind:value={img3} />
 				<Images fileName={img4} bind:value={img4} />
 			</div>
-			<Button suggested secondary onclick={nextPage}>Go Back</Button>
+
+			<Button suggested onclick={nextPage}>Next</Button>
+		{:else}
+			<Logo>
+				<img
+					class="logo"
+					src="/static/bobaBub.png"
+					alt="Mascot of Food Tinder, Boba Bub"
+					width="150"
+					height="150"
+				/>
+				<h3>Provide A Description</h3>
+			</Logo>
+
+			<InputField placeholderText="Location" bind:value={location} location />
+			<InputField placeholderText="Description" bind:value={description} textarea />
+			<Button quaternary onclick={nextPage}>Go Back</Button>
 			<InputField submit />
 		{/if}
 	</form>
@@ -67,15 +77,6 @@
 		display: grid;
 		grid-template-columns: 1fr 1fr;
 		gap: 20px;
-	}
-
-	.uploadTitle {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 20px;
-		color: var(--accent-foreground);
-		display: flex;
-		align-items: center;
-		justify-content: center;
+		padding-bottom: 15px;
 	}
 </style>

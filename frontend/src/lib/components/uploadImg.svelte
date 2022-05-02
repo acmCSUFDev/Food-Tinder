@@ -7,19 +7,21 @@
 	}
 </script>
 
-<label for="upload" class="imgUpload">
-	{#if value !== ''}
-		<!-- CHANGE SRC to /{fileName}-->
+{#if value !== ''}
+	<!-- CHANGE SRC to /{fileName}-->
+	<div class="imgUpload">
 		<img src="/bobaBub.png" alt={fileName} height="100" width="100" />
 
 		<p class="invisible" on:click={removeImg}>
 			<ion-icon name="add-circle-outline" class="plus" />
 		</p>
-	{:else}
+	</div>
+{:else}
+	<label for="upload" class="imgUpload">
 		<ion-icon name="add-circle-outline" class="plus" />
 		<input type="file" id="upload" bind:value />
-	{/if}
-</label>
+	</label>
+{/if}
 
 <style>
 	input[type='file'] {
