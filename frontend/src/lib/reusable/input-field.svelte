@@ -3,9 +3,12 @@
 	export let value = '';
 	export let error = false;
 	export let password = false;
+	export let submit = false;
 </script>
 
-{#if password}
+{#if submit}
+	<input type="submit" value="Upload" />
+{:else if password}
 	<input placeholder={placeholderText} class:error bind:value type="password" />
 {:else}
 	<input placeholder={placeholderText} class:error bind:value type="text" />
